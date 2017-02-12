@@ -1,0 +1,43 @@
+div.edit-post {
+
+  h2 {
+    padding-top: 0;
+  }
+
+  button {
+
+    background-color: #333;
+    color: #fff;
+    border-color: #444;
+    margin: 15px 5px;
+
+  }
+
+  form {
+
+    padding-left: 2%;
+    padding-right: 2%;
+
+    .form-group {
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    label {
+      letter-spacing: 1px;
+      color: #555;
+    }
+
+    .form-control {
+      border-radius: 0;
+      color: #555;
+    }
+
+    textarea {
+      min-height: 160px;
+      resize: vertical !important;
+    }
+
+  }
+
+}

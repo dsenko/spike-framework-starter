@@ -1,0 +1,20 @@
+{
+  "name": "spike-framework-starter-template",
+  "version": "0.0.1",
+  "ignore": [
+    "app",
+    ".bowerrc",
+    ".gitignore",
+    ".jshintignore",
+    ".jshintrc",
+    "bower.json",
+    "gruntfile.js",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "bootstrap": "<4.0.0",
+    "jQuery": "~3.0.0"
+  }
+}

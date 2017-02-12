@@ -1,0 +1,57 @@
+<!doctype html>
+<html class="no-js" lang="">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="libs/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.min.css">
+
+</head>
+<body>
+<component name="spinner"></component>
+<component name="topMenu"></component>
+<div class="content" spike-view></div>
+<component name="footer"></component>
+
+<div spike-modals></div>
+
+<!-- jQuery required by Bootstrap and Spike Framework -->
+<script src="libs/jquery/dist/jquery.min.js"></script>
+
+<!-- Bootstrap -->
+<script src="libs/bootstrap/dist/js/bootstrap.min.js"></script>
+
+<!-- Spike Framework -->
+<script src="libs/dist/spike-framework.js"></script>
+
+<!-- HTML Templates parsed to JS -->
+
+<!-- @if ENV='PROD' -->
+<script src="js/templates.min.js"></script>
+<!-- @endif -->
+
+<!-- @if ENV='DEV' -->
+<script src="js/templates.js"></script>
+<!-- @endif -->
+
+
+<!-- Spike application -->
+
+<!-- @if ENV='PROD' -->
+<script src="js/app.min.js"></script>
+<!-- @endif -->
+
+<!-- @if ENV='DEV' -->
+<script src="js/app.js"></script>
+<!-- @endif -->
+
+
+</body>
+
+</html>

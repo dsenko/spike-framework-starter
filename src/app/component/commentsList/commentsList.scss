@@ -1,0 +1,58 @@
+div.comments-list {
+
+  ul {
+
+    padding-left: 5%;
+    padding-right: 5%;
+
+    li {
+      color: #555;
+
+      div {
+
+        width: 100%;
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 20px;
+        overflow: hidden;
+        display: inline-block;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        margin: 0;
+
+        div {
+          display: inline-block;
+          width: 45%;
+
+          &.email {
+            color:  #fc3158;
+            text-align: left;
+          }
+
+          &.name {
+            text-align: right;
+          }
+
+        }
+
+
+      }
+
+      &.body {
+        margin: 1em 0 1em 0;
+        font-size: 15px;
+        letter-spacing: 0.2px;
+        font-weight: 400;
+      }
+
+      .separator {
+        width: 50%;
+        margin-left: 25%;
+        border-top: 1px solid #fc3158;
+      }
+
+    }
+
+  }
+
+}
