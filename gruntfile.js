@@ -104,18 +104,6 @@ module.exports = function (grunt) {
                 ],
             },
 
-
-            spike: {
-                files: [
-                    {
-                        expand: true,
-                        cwd: '../core/dist',
-                        src: ['**'],
-                        dest: './dist/libs/dist'
-                    }
-                ],
-            },
-
             libs: {
                 files: [
                     {
@@ -293,7 +281,7 @@ module.exports = function (grunt) {
 
     });
 
-    grunt.registerTask('pre-build', ['clean:prod', 'copy:index', 'copy:images', 'copy:i18', 'copy:libs', 'copy:spike', 'cachebreaker:prod']);
+    grunt.registerTask('pre-build', ['clean:prod', 'copy:index', 'copy:images', 'copy:i18', 'copy:libs', 'cachebreaker:prod']);
 
     grunt.registerTask('build', [
         'pre-build',
