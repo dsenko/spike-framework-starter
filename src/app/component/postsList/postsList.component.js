@@ -1,20 +1,24 @@
+'import $postService as app.service.Post';
+'import $router as app.router';
+'import $postListLister as app.lister.PostsList';
+
 app.component.register("PostsList", {
 
     init: function (data) {
 
         if (data.recentPosts) {
-            this.createRecentPostsList();
+            $this.createRecentPostsList();
         } else {
-            this.createAllPostsList();
+            $this.createAllPostsList();
         }
 
     },
 
     createRecentPostsList: function () {
 
-        app.service.Post.getRecentPosts()
+        $postService.getRecentPosts()
             .then(function (posts) {
-                app.component.PostsList.createPostsList(posts, 5);
+                $this.createPostsList(posts, 5);
             })
             .catch(function (error) {
             });
@@ -23,9 +27,9 @@ app.component.register("PostsList", {
 
     createAllPostsList: function () {
 
-        app.service.Post.getPosts()
+        $postService.getPosts()
             .then(function (posts) {
-                app.component.PostsList.createPostsList(posts, 20);
+                $this.createPostsList(posts, 20);
             })
             .catch(function (error) {
             });
@@ -34,11 +38,11 @@ app.component.register("PostsList", {
 
     createPostsList: function (posts, limit) {
 
-        app.lister.PostsList.render(
-            app.component.PostsList.selector.postsList(),
+        $postListLister.render(
+            $this.selector.postsList(),
             posts,
             {
-                select: app.component.PostsList.selectPost
+                select: $this.selectPost
             },
             {
                 limit: limit
@@ -49,7 +53,7 @@ app.component.register("PostsList", {
 
     selectPost: function (e) {
 
-        app.router.redirect('post/:postId', {
+        $router.redirect('post/:postId', {
             postId: e.eCtx.id
         });
 

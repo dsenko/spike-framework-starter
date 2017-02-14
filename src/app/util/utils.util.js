@@ -1,4 +1,0 @@
-app.util.register("Utils", {
-
-
-});

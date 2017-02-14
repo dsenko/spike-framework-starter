@@ -1,16 +1,18 @@
+'import $this as app.modal.ConfirmDelete';
+
 app.modal.register("ConfirmDelete", {
 
 	init : function(data){
 
-        this.selector.close().click(function(e){
+        $this.selector.close().click(function(e){
             e.preventDefault();
-			app.modal.ConfirmDelete.hide();
+            $this.hide();
 		});
 
         if(data.approveCallback){
-        	this.selector.ok().click(function(e){
+            $this.selector.ok().click(function(e){
         		e.preventDefault();
-                app.modal.ConfirmDelete.hide();
+                $this.hide();
                 data.approveCallback();
 			});
 		}

@@ -1,30 +1,33 @@
+'import $rest as app.rest';
+'import $listUtil as app.util.List';
+
 app.service.register("Post", {
 
     cachedPosts: null,
 
     getPosts: function () {
 
-        return app.rest.get(this.cachedPosts || app.config.apiUrl + '/posts')
+        return $rest.get($this.cachedPosts || app.config.apiUrl + '/posts')
             .then(function (result) {
-                app.service.Post.cachedPosts = result;
+                $this.cachedPosts = result;
             });
 
     },
 
     getRecentPosts: function () {
 
-        return app.rest.get(this.cachedPosts || app.config.apiUrl + '/posts')
+        return $rest.get($this.cachedPosts || app.config.apiUrl + '/posts')
             .then(function (result) {
-                app.service.Post.cachedPosts = result;
+                $this.cachedPosts = result;
             });
 
     },
 
     getPost: function (postId) {
 
-        var cachedPost = app.util.List.findByProperty(this.cachedPosts, 'id', postId);
+        var cachedPost = $listUtil.findByProperty($this.cachedPosts, 'id', postId);
 
-        return app.rest.get(cachedPost || app.config.apiUrl + '/posts/:postId', {
+        return $rest.get(cachedPost || app.config.apiUrl + '/posts/:postId', {
             pathParams: {
                 postId: postId
             }
@@ -34,20 +37,20 @@ app.service.register("Post", {
 
     savePost: function(post){
 
-        var postIndex = app.util.List.findIndexByProperty(this.cachedPosts, 'id', post.id);
+        var postIndex = $listUtil.findIndexByProperty($this.cachedPosts, 'id', post.id);
 
-        if(postIndex && this.cachedPosts[postIndex]){
-            this.cachedPosts[postIndex] = post;
+        if(postIndex && $this.cachedPosts[postIndex]){
+            $this.cachedPosts[postIndex] = post;
         }
 
     },
 
     deletePost: function(post){
 
-        var postIndex = app.util.List.findIndexByProperty(this.cachedPosts, 'id', post.id);
+        var postIndex = $listUtil.findIndexByProperty($this.cachedPosts, 'id', post.id);
 
-        if(postIndex && this.cachedPosts[postIndex]){
-            this.cachedPosts = app.util.List.removeFromList(this.cachedPosts, postIndex);
+        if(postIndex && $this.cachedPosts[postIndex]){
+            $this.cachedPosts = $listUtil.removeFromList($this.cachedPosts, postIndex);
         }
 
     }

@@ -53,6 +53,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-connect');
     grunt.loadNpmTasks('grunt-cache-breaker');
     grunt.loadNpmTasks('grunt-preprocess');
+    grunt.loadNpmTasks('grunt-shell');
 
     grunt.initConfig({
 
@@ -124,6 +125,9 @@ module.exports = function (grunt) {
             },
 
             js: {
+                options: {
+                    separator: 'SPIKE_IMPORT_END \n'
+                },
                 src: application.structure,
                 dest: application.outputApplication
             },
@@ -161,7 +165,7 @@ module.exports = function (grunt) {
 
         uglify: {
             options: {
-                mangle: false
+                mangle: true
             },
             app: {
                 files: application.uglifyApplication
@@ -199,7 +203,7 @@ module.exports = function (grunt) {
 
             js: {
                 files: application.structure,
-                tasks: ['concat:js', 'uglify:app', 'cachebreaker:dev'],
+                tasks: ['concat:js',  'shell:compileImportsAndGStrings', 'uglify:app', 'cachebreaker:dev'],
                 options: {
                     nospawn: true
                 }
@@ -270,6 +274,12 @@ module.exports = function (grunt) {
             }
         },
 
+        shell: {
+            compileImportsAndGStrings: {
+                command: 'java -jar bower_components/spike-compiler/build/libs/spike-compiler.jar imports-gstrings  dist/js/app.js dist/js/app.js'
+            }
+        },
+
         concurrent: {
             options: {
                 logConcurrentOutput: true
@@ -287,6 +297,7 @@ module.exports = function (grunt) {
         'pre-build',
         'clean:dev',
         'concat:js',
+        'shell:compileImportsAndGStrings',
         'html2js',
         'uglify:app',
         'uglify:templates',
@@ -307,5 +318,6 @@ module.exports = function (grunt) {
         'preprocess:dev',
         'concurrent:live'
     ]);
+
 
 };

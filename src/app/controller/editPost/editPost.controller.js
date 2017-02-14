@@ -1,15 +1,20 @@
+'import $router as app.router';
+'import $system as app.system';
+'import $postService as app.service.Post';
+'import $confirmModal as app.modal.ConfirmDelete';
+
 app.controller.register("EditPost", {
 
     post: null,
 
     init: function (data) {
 
-        app.ctx.selector.backToPost().click(app.router.back);
+        $this.selector.backToPost().click(app.router.back);
 
-        app.service.Post.getPost(data.pathParams.postId)
+        $postService.getPost(data.pathParams.postId)
             .then(function(result){
-                app.ctx.post = result;
-                app.ctx.setPost();
+                $this.post = result;
+                $this.setPost();
             })
             .catch(function(error){
             });
@@ -18,26 +23,26 @@ app.controller.register("EditPost", {
 
     setPost: function(){
 
-        app.ctx.selector.names.title().set(app.ctx.post.title);
-        app.ctx.selector.names.body().set(app.ctx.post.body);
+        $this.selector.names.title().set($this.post.title);
+        $this.selector.names.body().set($this.post.body);
 
-        app.ctx.selector.save().click(function(e){
+        $this.selector.save().click(function(e){
             e.preventDefault();
 
-            var serializedPost = $.extend(true, app.ctx.post, app.ctx.selector.postForm().serializeObject());
+            var serializedPost = $.extend(true, $this.post, $this.selector.postForm().serializeObject());
 
-            app.service.Post.savePost(serializedPost);
-            app.router.back();
+            $postService.savePost(serializedPost);
+            $router.back();
 
         });
 
-        app.ctx.selector.delete().click(function(e){
+        $this.selector.delete().click(function(e){
             e.preventDefault();
 
-            app.system.render(app.modal.ConfirmDelete, {
+            $system.render($confirmModal, {
                 approveCallback: function(){
-                    app.service.Post.deletePost(app.ctx.post);
-                    app.router.redirect('/posts');
+                    $postService.deletePost($this.post);
+                    $router.redirect('/posts');
                 }
             });
 

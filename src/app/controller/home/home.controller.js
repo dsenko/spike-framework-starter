@@ -1,3 +1,5 @@
+'import $router as app.router';
+
 app.controller.register("Home", {
 
     components: {
@@ -7,6 +9,11 @@ app.controller.register("Home", {
     },
 
     init: function () {
+
+        $this.selector.home().click(function () {
+            $router.redirect($router.createLink('/someLink'))
+        });
+
     }
 
 });

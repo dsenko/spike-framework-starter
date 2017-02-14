@@ -1,9 +1,12 @@
+'import $this as app.controller.Comments';
+'import $router as app.router';
+
 app.controller.register("Comments", {
 
     components: ['CommentsList'],
 
     init: function () {
-        app.ctx.selector.backToPost().click(app.router.back);
+        $this.selector.backToPost().click($router.back);
     }
 
 

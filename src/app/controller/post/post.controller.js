@@ -1,15 +1,18 @@
+'import $router as app.router';
+'import $postService as app.service.Post';
+
 app.controller.register("Post", {
 
     post: null,
 
     init: function (data) {
 
-        app.ctx.selector.backToList().click(app.router.back);
+        $this.selector.backToList().click($router.back);
 
-        app.service.Post.getPost(data.pathParams.postId)
+        $postService.getPost(data.pathParams.postId)
             .then(function(result){
-                app.ctx.post = result;
-                app.ctx.setPost();
+                $this.post = result;
+                $this.setPost();
             })
             .catch(function(error){
 
@@ -19,12 +22,12 @@ app.controller.register("Post", {
 
     setPost: function(){
 
-        app.ctx.selector.title().set(app.ctx.post.title);
-        app.ctx.selector.author().set(app.ctx.post.author);
-        app.ctx.selector.body().set(app.ctx.post.body);
+        $this.selector.title().set($this.post.title);
+        $this.selector.author().set($this.post.author);
+        $this.selector.body().set($this.post.body);
 
-        app.ctx.selector.comments().set(app.router.createLink('post/comments/'+app.ctx.post.id));
-        app.ctx.selector.edit().set(app.router.createLink('post/edit/'+app.ctx.post.id));
+        $this.selector.comments().set($router.createLink('post/comments/'+$this.post.id));
+        $this.selector.edit().set($router.createLink('post/edit/'+$this.post.id));
 
     }
 

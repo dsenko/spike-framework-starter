@@ -17,5 +17,8 @@
     "bootstrap": "<4.0.0",
     "jQuery": "~3.0.0",
     "spike-framework-core": "https://github.com/dsenko/spike-framework-core.git#master"
+  },
+  "devDependencies": {
+    "spike-compiler": "https://github.com/dsenko/spike-compiler.git#master"
   }
 }
