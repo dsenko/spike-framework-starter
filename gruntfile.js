@@ -41,7 +41,6 @@ application.cssStyles[application.outputCssDistMinified] = application.outputCss
 
 module.exports = function (grunt) {
 
-    grunt.loadNpmTasks('grunt-common-html2js');
     grunt.loadNpmTasks('grunt-concurrent');
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-concat');
@@ -139,14 +138,6 @@ module.exports = function (grunt) {
 
         },
 
-        html2js: {
-            options: {},
-            main: {
-                src: application.html,
-                dest: application.outputTemplates
-            },
-        },
-
         sass: {
             dist: {
                 files: application.sassStyles
@@ -187,7 +178,7 @@ module.exports = function (grunt) {
 
             html: {
                 files: application.html,
-                tasks: ['html2js', 'uglify:templates'],
+                tasks: ['shell:compileTemplates', 'uglify:templates'],
                 options: {
                     nospawn: true
                 }
@@ -277,6 +268,9 @@ module.exports = function (grunt) {
         shell: {
             compileImportsAndGStrings: {
                 command: 'java -jar bower_components/spike-compiler/build/libs/spike-compiler.jar imports-gstrings  dist/js/app.js dist/js/app.js'
+            },
+            compileTemplates: {
+                command: 'java -jar bower_components/spike-compiler/build/libs/spike-compiler.jar templates  src/app dist/js/templates.js'
             }
         },
 
@@ -298,7 +292,7 @@ module.exports = function (grunt) {
         'clean:dev',
         'concat:js',
         'shell:compileImportsAndGStrings',
-        'html2js',
+        'shell:compileTemplates',
         'uglify:app',
         'uglify:templates',
         'concat:sass',
