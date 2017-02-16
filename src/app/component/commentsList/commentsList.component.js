@@ -3,25 +3,19 @@
 
 app.component.register("CommentsList", {
 
+    inherits: [
+        app.abstract.CommentsListInit,
+        app.abstract.CommentsList,
+    ],
+
     init: function (data) {
+
+        console.log(this);
+
         $this.createCommentsList(data.pathParams.postId);
+        $this.showMessage();
     },
 
-    createCommentsList: function (postId) {
 
-        $comments.getComments(postId)
-            .then(function (comments) {
-
-                $commentsList.render(
-                    $this.selector.commentsList(),
-                    {
-                        comments: comments
-                    }
-                );
-
-            })
-            .catch(function (error) {
-            });
-    }
 
 });

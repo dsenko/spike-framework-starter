@@ -14,7 +14,7 @@ app.config.extend({
     mainController: "Posts",
 
     transitions: true,
-    
+
     routing: app.router.create()
         .path('/', {
             controller: 'Home'

@@ -17,15 +17,29 @@ var application = {
 
     structure: [
         './src/app/config.js',
-        './src/app/component/**/*.js',
-        './src/app/controller/**/*.js',
-        './src/app/modal/**/*.js',
-        './src/app/service/**/*.js',
-        './src/app/service/*.js',
-        './src/app/partial/**/*.js',
-        './src/app/partial/*.js',
-        './src/app/util/**/*.js',
-        './src/app/util/*.js',
+
+        './src/app/component/**/*.abstract.js',
+        './src/app/controller/**/*.abstract.js',
+        './src/app/modal/**/*.abstract.js',
+        './src/app/service/**/*.abstract.js',
+        './src/app/service/*.abstract.js',
+        './src/app/partial/**/*.abstract.js',
+        './src/app/partial/*.abstract.js',
+        './src/app/util/**/*.abstract.js',
+        './src/app/util/*.abstract.js',
+        './src/app/abstract/**/*.abstract.js',
+        './src/app/abstract/*.abstract.js',
+
+        './src/app/component/**/*.component.js',
+        './src/app/controller/**/*.controller.js',
+        './src/app/modal/**/*.modal.js',
+        './src/app/service/**/*.service.js',
+        './src/app/service/*.service.js',
+        './src/app/partial/**/*.partial.js',
+        './src/app/partial/*.partial.js',
+        './src/app/util/**/*.util.js',
+        './src/app/util/*.util.js',
+
         './src/app/main.js',
     ],
 
