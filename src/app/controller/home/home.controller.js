@@ -15,11 +15,6 @@ app.controller.register("Home", {
         $this.selector.home().click(function () {
             $router.redirect($router.createLink("/post/${id}"))
         });
-
-        app.partial.LoginForm.render($this.selector.beforePost(), {
-            name: 'xxx'
-        });
-
     }
 
 });

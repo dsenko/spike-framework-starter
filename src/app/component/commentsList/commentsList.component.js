@@ -1,4 +1,4 @@
-'import $commentsLister as app.lister.CommentsList';
+'import $commentsList as app.partial.CommentsList';
 'import $comments as app.service.Comments';
 
 app.component.register("CommentsList", {
@@ -12,9 +12,11 @@ app.component.register("CommentsList", {
         $comments.getComments(postId)
             .then(function (comments) {
 
-                $commentsLister.render(
+                $commentsList.render(
                     $this.selector.commentsList(),
-                    comments
+                    {
+                        comments: comments
+                    }
                 );
 
             })

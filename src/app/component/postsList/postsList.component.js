@@ -1,6 +1,6 @@
 'import $postService as app.service.Post';
 'import $router as app.router';
-'import $postListLister as app.lister.PostsList';
+'import $postsList as app.partial.PostsList';
 
 app.component.register("PostsList", {
 
@@ -38,25 +38,15 @@ app.component.register("PostsList", {
 
     createPostsList: function (posts, limit) {
 
-        $postListLister.render(
+        $postsList.render(
             $this.selector.postsList(),
-            posts,
             {
-                select: $this.selectPost
-            },
-            {
-                limit: limit
+                limit: limit,
+                posts: posts
             }
         );
 
-    },
-
-    selectPost: function (e) {
-
-        $router.redirect('post/:postId', {
-            postId: e.eCtx.id
-        });
-
     }
+
 
 });

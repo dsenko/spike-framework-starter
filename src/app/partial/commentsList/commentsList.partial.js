@@ -1,0 +1,3 @@
+app.partial.register("CommentsList", {
+
+});

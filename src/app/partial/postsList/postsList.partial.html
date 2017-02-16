@@ -1,0 +1,22 @@
+'import $this as app.partial.PostsList';
+
+<ul>
+
+    # $.each($local.posts.slice(0, $local.limit), function(i, post){
+
+    <li >
+
+        <div class="title">[[post.title]]</div>
+        <div class="body">[[post.body]]</div>
+        <div class="read-more">
+            <button type="button" class="btn btn-default" onclick="$this.selectPost([[post.id]])" spike-translation="read_more">
+            </button>
+        </div>
+
+        <div class="separator">&nbsp;</div>
+
+    </li>
+
+    #});
+
+</ul>

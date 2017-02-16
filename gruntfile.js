@@ -19,8 +19,6 @@ var application = {
         './src/app/config.js',
         './src/app/component/**/*.js',
         './src/app/controller/**/*.js',
-        './src/app/lister/**/*.js',
-        './src/app/lister/*.js',
         './src/app/modal/**/*.js',
         './src/app/service/**/*.js',
         './src/app/service/*.js',

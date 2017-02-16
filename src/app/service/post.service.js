@@ -5,10 +5,6 @@ app.service.register("Post", {
 
     cachedPosts: null,
 
-  sdasdas: function(){
-        console.log('sdasdas');
-  },
-
     getPosts: function () {
 
         return $rest.get($this.cachedPosts || app.config.apiUrl + '/posts')
@@ -20,7 +16,9 @@ app.service.register("Post", {
 
     getRecentPosts: function () {
 
-        return $rest.get($this.cachedPosts || app.config.apiUrl + '/posts')
+        return $rest.get($this.cachedPosts || app.config.apiUrl + '/posts', {
+            interceptors: ["Request"]
+        })
             .then(function (result) {
                 $this.cachedPosts = result;
             });

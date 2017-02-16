@@ -9,6 +9,12 @@ app.message.add("pl", "i18/pl.json");
  */
 app.system.disableCache();
 
+app.rest.interceptor("Request", function(response, promise){
+
+    app.log('invoke Request interceptor');
+
+});
+
 app.rest.spinnerHide = function(requestUri){
     app.component.Spinner.hide();
 }
