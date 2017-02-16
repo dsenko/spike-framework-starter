@@ -9,7 +9,7 @@ app.config.extend({
 
     lang: "en",
 
-    rootPath: './src/app',
+    rootPath: 'src/app',
     bootstrapModal: true,
     mainController: "Posts",
 

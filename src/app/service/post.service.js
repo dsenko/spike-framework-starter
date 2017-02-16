@@ -5,6 +5,10 @@ app.service.register("Post", {
 
     cachedPosts: null,
 
+  sdasdas: function(){
+        console.log('sdasdas');
+  },
+
     getPosts: function () {
 
         return $rest.get($this.cachedPosts || app.config.apiUrl + '/posts')

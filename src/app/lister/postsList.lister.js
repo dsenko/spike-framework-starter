@@ -1,5 +1,11 @@
 app.lister.register("PostsList", function(i, element, output){
 
+    if(i == 0){
+        output += app.partial.include(app.partial.LoginForm, {
+            name: 'Dawid'
+        });
+    }
+
     output +=  '<li >';
     output += '<div class="title">'+element.title+'</div>';
     output += '<div class="body">'+element.body+'</div>';

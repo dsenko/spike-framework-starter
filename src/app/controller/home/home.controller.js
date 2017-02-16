@@ -16,6 +16,10 @@ app.controller.register("Home", {
             $router.redirect($router.createLink("/post/${id}"))
         });
 
+        app.partial.LoginForm.render($this.selector.beforePost(), {
+            name: 'xxx'
+        });
+
     }
 
 });

@@ -24,6 +24,8 @@ var application = {
         './src/app/modal/**/*.js',
         './src/app/service/**/*.js',
         './src/app/service/*.js',
+        './src/app/partial/**/*.js',
+        './src/app/partial/*.js',
         './src/app/util/**/*.js',
         './src/app/util/*.js',
         './src/app/main.js',
@@ -52,7 +54,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-connect');
     grunt.loadNpmTasks('grunt-cache-breaker');
     grunt.loadNpmTasks('grunt-preprocess');
-    grunt.loadNpmTasks('grunt-shell');
+    grunt.loadNpmTasks('grunt-shell-spawn');
 
     grunt.initConfig({
 
