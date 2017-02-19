@@ -4,8 +4,19 @@
 
 app.abstract.register("CommentsListInit", {
 
+    message: 'Comment message',
+
    showMessage: function(){
-       app.log('ok');
-   }
+
+
+       var message = $super.getMessage()
+
+       app.log('showMessage ${{message}}');
+
+   },
+
+    getMessage: function(){
+        return $super.message;
+    }
 
 });

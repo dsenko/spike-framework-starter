@@ -4,6 +4,7 @@ app.component.register("Footer", {
 
     init: function (params) {
 
+
     },
 
 });
