@@ -8,13 +8,8 @@ app.controller.register("Home", {
         }
     },
 
-    init: function () {
-
-        var id = 2;
-
-        $this.selector.home().click(function () {
-            $router.redirect($router.createLink("/post/${id}"))
-        });
+    init: function (params) {
+        console.log(params);
     }
 
 });

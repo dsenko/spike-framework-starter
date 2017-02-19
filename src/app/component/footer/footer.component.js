@@ -2,7 +2,7 @@ app.component.register("Footer", {
 
     global: true,
 
-    init: function () {
+    init: function (params) {
 
     },
 
