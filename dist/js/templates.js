@@ -96,7 +96,7 @@
  "" ; 
 ; window["_spike_templates"]["src/app/controller/home/home.view.html"] =  "<div class=\"home\">" + 
  "" + 
- "    <h2 id=\"home\" spike-translation=\"home\">home</h2>" + 
+ "    <h2 spike-translation=\"home\" id=\"home\">home id=\"home\"</h2>" + 
  "    <p spike-translation=\"recent_posts\"></p>" + 
  "" + 
  "    <component name=\"postsList\"></component>" + 
