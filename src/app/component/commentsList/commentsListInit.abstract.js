@@ -8,10 +8,10 @@ app.abstract.register("CommentsListInit", {
 
    showMessage: function(){
 
-
        var message = $super.getMessage()
 
-       app.log('showMessage ${{message}}');
+       app.log("showMessage $[message]");
+       app.log('showMessage $[[message]]');
 
    },
 

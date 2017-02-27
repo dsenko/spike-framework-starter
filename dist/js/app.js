@@ -76,9 +76,9 @@ app.config.extend({
    showMessage: function(){
  var ___super = this; 
 
-
        var message = ___super.getMessage()
 
+       app.log("showMessage "+message+"");
        app.log('showMessage'+ message+'');
 
    },
