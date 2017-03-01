@@ -533,9 +533,6 @@ app.system = {
         app.debug('Invoke system.__renderModal with params: {0} {1} {2}', [modalObject, modalInitialData, afterRenderCallback]);
         app.log('Rendering modal {0}', [modalObject.__name]);
 
-        //Scrolling to top of page
-        $(window).scrollTop(0);
-
         //Checks network status
         if (modalObject.checkNetwork == true) {
             app.__cordova.checkNetwork();
@@ -3070,15 +3067,6 @@ app.modal = {
     modalObject.__render = function (modalPassedData) {
       app.debug('Invoke modalObject.__render with params: {0}', [modalPassedData]);
 
-      if (app.modal.__modalWrappers[modalObject.__name] && app.modal[modalObject.__name].__hidden == true) {
-        app.debug('Modal is already rendered and will be showed again');
-        app.modal[modalObject.__name].show();
-        return;
-      } else if (app.modal.__modalWrappers[modalObject.__name]) {
-        app.debug('Modal is already rendered and cannot be rendered twice');
-        return;
-      }
-
       app.modal[modalObject.__name] = $.extend(true, {}, app.modal.__dataArchive[modalObject.__name]);
       app.mCtx[modalObject.__name] = app.modal[modalObject.__name];
 
@@ -3681,6 +3669,11 @@ app.partial = {
 
           if (!selector) {
             app.system.__throwError(app.system.__messages.PARITAL_SELECTOR_NOT_DEFINED, [__partialObject.__name]);
+          }
+
+          if(__partialObject.before && app.util.System.isFunction(__partialObject.before)){
+              app.debug('Invokes partial  {0} before() function', [__partialObject.__name]);
+              __partialObject.before();
           }
 
           app.debug('Binding partial {0} template to passed selector {1} ', [__partialObject.__name, selector]);
@@ -6422,11 +6415,11 @@ jQuery.fn.extend({
 
     set: function (_value, _filter) {
 
-        if (!_value) {
+        if (_value === undefined || _value == null) {
             return;
         }
 
-        if (_filter && _value) {
+        if (_filter && _value !== undefined && _value !== null) {
             _value = _filter(_value);
         }
 

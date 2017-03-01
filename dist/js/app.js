@@ -45,8 +45,7 @@ app.config.extend({
 
 /**SPIKE_IMPORT_END**/ 
 /** 'import $commentsList as app.partial.CommentsList'; **/
-/** 'import $comments as app.service.Comments'; **/
-/** 'import $super as app.component.CommentsList'; **/app.abstract.register("CommentsList", {
+/** 'import $comments as app.service.Comments'; **/app.abstract.register("CommentsList", {
 
     createCommentsList: function (postId) {
  var ___super = this; 
@@ -68,8 +67,7 @@ app.config.extend({
 
 });/**SPIKE_IMPORT_END**/ 
 /** 'import $commentsList as app.partial.CommentsList'; **/
-/** 'import $comments as app.service.Comments'; **/
-/** 'import $super as app.component.CommentsList'; **/app.abstract.register("CommentsListInit", {
+/** 'import $comments as app.service.Comments'; **/app.abstract.register("CommentsListInit", {
 
     message: 'Comment message',
 
@@ -86,6 +84,35 @@ app.config.extend({
     getMessage: function(){
  var ___super = this; 
         return ___super.message;
+    }
+
+});/**SPIKE_IMPORT_END**/ 
+/** 'import $router as app.router'; **/app.abstract.register("Modal", {
+
+    bindCancel: function(){
+ var ___super = this; 
+
+        ___super.selector.close().click(function(e){
+            e.preventDefault();
+            ___super.hide();
+        });
+
+    },
+
+    bindOk: function(params){
+ var ___super = this; 
+
+        if(params.approveCallback){
+
+            ___super.selector.ok().click(function(e){
+                e.preventDefault();
+                ___super.hide();
+                params.approveCallback();
+            });
+
+
+        }
+
     }
 
 });/**SPIKE_IMPORT_END**/ 
@@ -369,20 +396,14 @@ app.controller.register("Posts", {
 });/**SPIKE_IMPORT_END**/ 
 /** 'import $this as app.modal.ConfirmDelete'; **/app.modal.register("ConfirmDelete", {
 
-	init : function(data){
+    inherits: [
+        app.abstract.Modal
+    ],
 
-        app.modal.ConfirmDelete.selector.close().click(function(e){
-            e.preventDefault();
-            app.modal.ConfirmDelete.hide();
-		});
+	init : function(params){
 
-        if(data.approveCallback){
-            app.modal.ConfirmDelete.selector.ok().click(function(e){
-        		e.preventDefault();
-                app.modal.ConfirmDelete.hide();
-                data.approveCallback();
-			});
-		}
+        app.modal.ConfirmDelete.bindCancel();
+        app.modal.ConfirmDelete.bindOk(params);
 
 	}
 

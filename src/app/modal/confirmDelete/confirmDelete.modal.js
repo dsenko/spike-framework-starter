@@ -2,20 +2,14 @@
 
 app.modal.register("ConfirmDelete", {
 
-	init : function(data){
+    inherits: [
+        app.abstract.Modal
+    ],
 
-        $this.selector.close().click(function(e){
-            e.preventDefault();
-            $this.hide();
-		});
+	init : function(params){
 
-        if(data.approveCallback){
-            $this.selector.ok().click(function(e){
-        		e.preventDefault();
-                $this.hide();
-                data.approveCallback();
-			});
-		}
+        $this.bindCancel();
+        $this.bindOk(params);
 
 	}
 
