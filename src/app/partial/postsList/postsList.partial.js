@@ -2,6 +2,8 @@
 
 app.partial.register("PostsList", {
 
+    replace: true,
+
     selectPost: function (postId) {
 
         $router.redirect('post/:postId', {

@@ -66,51 +66,37 @@ app.config.extend({
     }
 
 });/**SPIKE_IMPORT_END**/ 
-/** 'import $commentsList as app.partial.CommentsList'; **/
-/** 'import $comments as app.service.Comments'; **/app.abstract.register("CommentsListInit", {
-
-    message: 'Comment message',
-
-   showMessage: function(){
- var ___super = this; 
-
-       var message = ___super.getMessage()
-
-       app.log("showMessage "+message+"");
-       app.log('showMessage'+ message+'');
-
-   },
-
-    getMessage: function(){
- var ___super = this; 
-        return ___super.message;
-    }
-
-});/**SPIKE_IMPORT_END**/ 
 /** 'import $router as app.router'; **/app.abstract.register("Modal", {
 
-    bindCancel: function(){
+    /**
+     * some import
+     */
+    bindCancel: function () {
  var ___super = this; 
 
-        ___super.selector.close().click(function(e){
+        ___super.selector.close().click(function (e) {
             e.preventDefault();
             ___super.hide();
         });
 
     },
 
-    bindOk: function(params){
+    realizeOk: function (e) {
+ var ___super = this; 
+        e.preventDefault();
+        ___super.hide();
+        params.approveCallback();
+    },
+
+    /**
+     * method
+     * @param params
+     */
+    bindOk: function (params) {
  var ___super = this; 
 
-        if(params.approveCallback){
-
-            ___super.selector.ok().click(function(e){
-                e.preventDefault();
-                ___super.hide();
-                params.approveCallback();
-            });
-
-
+        if (params.approveCallback) {
+            ___super.selector.ok().click(___super.realizeOk.bind(___super));
         }
 
     }
@@ -120,16 +106,11 @@ app.config.extend({
 /** 'import $comments as app.service.Comments'; **/app.component.register("CommentsList", {
 
     inherits: [
-        app.abstract.CommentsListInit,
         app.abstract.CommentsList,
     ],
 
     init: function (data) {
-
-        console.log(this);
-
         app.component.CommentsList.createCommentsList(data.pathParams.postId);
-        app.component.CommentsList.showMessage();
     },
 
 
@@ -276,7 +257,6 @@ app.controller.register("About", {
     components: ['CommentsList'],
 
     init: function () {
-        app.controller.Comments.selector.backToPost().click(app.router.back);
     }
 
 
@@ -375,9 +355,13 @@ app.controller.register("NotFound", {
 
     setPost: function(){
 
-        app.controller.Post.selector.title().set(app.controller.Post.post.title);
-        app.controller.Post.selector.author().set(app.controller.Post.post.author);
-        app.controller.Post.selector.body().set(app.controller.Post.post.body);
+        app.controller.Post.post.post = {
+            title: app.controller.Post.post.title,
+            author: app.controller.Post.post.author,
+            body: app.controller.Post.post.body
+        };
+
+        app.controller.Post.selector.postContent().set(app.controller.Post.post);
 
         app.controller.Post.selector.comments().set(app.router.createLink('post/comments/'+app.controller.Post.post.id));
         app.controller.Post.selector.edit().set(app.router.createLink('post/edit/'+app.controller.Post.post.id));
@@ -486,8 +470,12 @@ app.controller.register("Posts", {
 });/**SPIKE_IMPORT_END**/ 
 app.partial.register("CommentsList", {
 
+    replace: true
+
 });/**SPIKE_IMPORT_END**/ 
 /** 'import $router as app.router'; **/app.partial.register("PostsList", {
+
+    replace: true,
 
     selectPost: function (postId) {
 

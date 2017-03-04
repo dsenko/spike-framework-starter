@@ -22,9 +22,13 @@ app.controller.register("Post", {
 
     setPost: function(){
 
-        $this.selector.title().set($this.post.title);
-        $this.selector.author().set($this.post.author);
-        $this.selector.body().set($this.post.body);
+        $this.post.post = {
+            title: $this.post.title,
+            author: $this.post.author,
+            body: $this.post.body
+        };
+
+        $this.selector.postContent().set($this.post);
 
         $this.selector.comments().set($router.createLink('post/comments/'+$this.post.id));
         $this.selector.edit().set($router.createLink('post/edit/'+$this.post.id));

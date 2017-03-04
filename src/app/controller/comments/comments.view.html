@@ -1,6 +1,8 @@
+'import $router as app.router';
+
 <div class="comments">
 
-    <button class="btn btn-primary back-to-btn" id="backToPost" spike-translation="back_to_post"></button>
+    <button class="btn btn-primary back-to-btn" [click]="$router.back();" spike-translation="back_to_post"></button>
 
     <h2 spike-translation="comments_list"></h2>
     <component name="commentsList"></component>

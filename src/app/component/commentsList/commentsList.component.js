@@ -4,16 +4,11 @@
 app.component.register("CommentsList", {
 
     inherits: [
-        app.abstract.CommentsListInit,
         app.abstract.CommentsList,
     ],
 
     init: function (data) {
-
-        console.log(this);
-
         $this.createCommentsList(data.pathParams.postId);
-        $this.showMessage();
     },
 
 

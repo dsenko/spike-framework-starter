@@ -6,7 +6,6 @@ app.controller.register("Comments", {
     components: ['CommentsList'],
 
     init: function () {
-        $this.selector.backToPost().click($router.back);
     }
 
 

@@ -46,9 +46,9 @@ var app = {
         TRANSLATION: 'spike-translation',
         VIEW: 'spike-view',
         MODALS: 'spike-modals',
+        SET_VAL: 'spike-val',
 
-        LISTER_EVENT: 'event',
-        LISTER_TEXT: 'text',
+        TEMPLATE_INCLUDE: '@template',
 
     },
 
@@ -74,7 +74,7 @@ var app = {
      */
     currentController: null,
 
-    getCurrentController: function(){
+    getCurrentController: function () {
         return app.currentController || app.config.mainController;
     },
 
@@ -255,15 +255,15 @@ var app = {
 
             var stackStr = '';
             for (var i = 0; i < lineAccessingLogger.length; i++) {
-                if(i == lineAccessingLogger.length -1){
-                    stackStr += "\n ERROR HERE: "+lineAccessingLogger[i];
-                }else{
-                    stackStr += "\n"+lineAccessingLogger[i];
+                if (i == lineAccessingLogger.length - 1) {
+                    stackStr += "\n ERROR HERE: " + lineAccessingLogger[i];
+                } else {
+                    stackStr += "\n" + lineAccessingLogger[i];
                 }
             }
 
             console.log('%c' + app.util.System.currentDateLog() + ' Spike Framework: ' + message + ' stacktrace: ', 'color: ' + color);
-            console.log('%c' +stackStr, 'color: ' + color);
+            console.log('%c' + stackStr, 'color: ' + color);
 
         } else {
             console.log('%c' + app.util.System.currentDateLog() + ' Spike Framework: ' + message, 'color: ' + color);
@@ -394,8 +394,21 @@ app.system = {
      * new controller rendering
      *
      */
-    __clearSelectorsCache: function(){
+    __clearSelectorsCache: function () {
         app.system.__selectorsCache = {};
+    },
+
+    /**
+     * @private
+     *
+     * Clears selector given id from cache
+     *
+     * @param selectorId
+     */
+    __clearSelectorInCache: function (selectorId) {
+        if (app.system.__selectorsCache[selectorId]) {
+            app.system.__selectorsCache[selectorId] = null;
+        }
     },
 
     /**
@@ -441,11 +454,11 @@ app.system = {
 
                 var selector = app.system.__selectorsCache[newId];
 
-                if(!selector){
-                    selector =  $('#' + newId);
+                if (!selector) {
+                    selector = $('#' + newId);
                     selector.plainId = newId;
                     app.system.__selectorsCache[newId] = selector;
-                }else{
+                } else {
                     app.system.__cacheUsageCounter++;
                 }
 
@@ -595,7 +608,7 @@ app.system = {
             afterRenderCallback();
         }
 
-        app.ok('Selectors cache usage during app lifecycle: '+app.system.__cacheUsageCounter);
+        app.ok('Selectors cache usage during app lifecycle: ' + app.system.__cacheUsageCounter);
 
     },
 
@@ -794,7 +807,7 @@ app.system = {
 
         app.debug('Try to invoke system.render with controller: {0}', [app.config.mainController]);
 
-        if(!app.config.routingEnabled){
+        if (!app.config.routingEnabled) {
             app.system.render(app.controller[app.config.mainController], null, callBack);
             app.__starting = false;
         }
@@ -819,7 +832,79 @@ app.system = {
             app.system.__throwError(app.system.__messages.WEBSQL_SUPPORT);
         }
 
-    }
+    },
+
+    /**
+     * @private
+     *
+     * Finds all elements with attribute @spike-event
+     * in given (root) selector.
+     *
+     * Gets event name and event function string, binds
+     * jQuery event with created function.
+     *
+     * @param rootSelector
+     */
+    __bindEvents: function (rootSelector) {
+
+        rootSelector.find('[spike-event]').each(function (i, element) {
+
+            element = $(element);
+
+            var eventName = element.attr('spike-event');
+            element.removeAttr('spike-event');
+
+            var eventFunctionBody = element.attr('spike-event-' + eventName);
+
+            element.off().on(eventName, Function(eventFunctionBody));
+
+        });
+
+    },
+
+    /**
+     * @private
+     *
+     * Function searches and replaces all static templates in given HTML
+     * Returns processed HTML
+     *
+     * @param templateHtml
+     */
+    __replacePlainTemplates: function (templateHtml) {
+
+        var templatesIncludes = app.util.System.findStringBetween(templateHtml, app.__attributes.TEMPLATE_INCLUDE + '\\(', '\\)');
+
+        for (var i = 0; i < templatesIncludes.length; i++) {
+            templatesIncludes[i] = templatesIncludes[i].replace(app.__attributes.TEMPLATE_INCLUDE + '(', '').replace(')', '');
+            templatesIncludes[i] = {
+                templateFullName: app.system.__getStaticTemplateName(templatesIncludes[i]),
+                templateInclude: templatesIncludes[i]
+            }
+        }
+
+        for (var i = 0; i < templatesIncludes.length; i++) {
+
+            if (window[app.__globalTemplates][templatesIncludes[i].templateFullName]) {
+                templateHtml = templateHtml.split(app.__attributes.TEMPLATE_INCLUDE + '(' + templatesIncludes[i].templateInclude + ')').join(window[app.__globalTemplates][templatesIncludes[i].templateFullName]);
+            }
+
+        }
+
+        return templateHtml;
+
+    },
+
+    /**
+     * @private
+     *
+     * Returns static template from @__globalTemplates
+     * @param templateName
+     *
+     */
+    __getStaticTemplateName: function (templateName) {
+        return '@template/' + templateName;
+    },
+
 
 };
 
@@ -827,17 +912,18 @@ app.system = {
  * Added to using bind to provide $this context into jQuery events callbacks
  */
 if (!Function.prototype.bind) {
-    Function.prototype.bind = function(oThis) {
+    Function.prototype.bind = function (oThis) {
         if (typeof this !== 'function') {
             // closest thing possible to the ECMAScript 5
             // internal IsCallable function
             throw new TypeError('Function.prototype.bind - what is trying to be bound is not callable');
         }
 
-        var aArgs   = Array.prototype.slice.call(arguments, 1),
+        var aArgs = Array.prototype.slice.call(arguments, 1),
             fToBind = this,
-            fNOP    = function() {},
-            fBound  = function() {
+            fNOP = function () {
+            },
+            fBound = function () {
                 return fToBind.apply(this instanceof fNOP
                         ? this
                         : oThis,
@@ -2421,6 +2507,9 @@ app.component = {
 
             componentSelector.replaceWith(app.com[componentObject.__name].__template);
 
+            //Binds spike events
+            app.system.__bindEvents(componentSelector);
+
             //Translate DOM
             app.message.__translate();
 
@@ -2462,6 +2551,16 @@ app.component = {
             if(!templateHtml){
                 app.system.__throwError('No view found for component: {0}, view path: {1}', [componentObject.__name, componentObject.__view]);
             }
+
+            //Executing template function
+            try {
+                templateHtml = templateHtml();
+            }catch (err){
+                app.system.__throwError('Error occured when executing component {0} template {1}', [componentObject.__name, componentObject.__view]);
+            }
+
+            //Includes static templates
+            templateHtml = app.system.__replacePlainTemplates(templateHtml);
 
             var selectorsObj = app.system.__createSelectors(templateHtml);
 
@@ -2603,203 +2702,216 @@ app.component = {
  */
 app.controller = {
 
-  /**
-   * @private
-   * Storage for controllers instances
-   */
-  __dataArchive: {},
-
-  /**
-   * @public
-   *
-   * Substitute method for register
-   *
-   * @param controllerName
-   * @param controllerObject
-   */
-  add: function (controllerName, controllerObject) {
-    this.register(controllerName, controllerObject);
-  },
-
-  /**
-   * @public
-   *
-   * Registering new controller in application
-   * Creates controller object
-   *
-   * @param controllerName
-   * @param controllerObject
-   */
-  register: function (controllerName, controllerObject) {
-
-    // Filter if name is invalid (can break application)
-    app.system.__filterRestrictedNames(controllerName);
-
-    if (controllerObject.inherits) {
-      // Apply extending from abstracts
-      controllerObject = app.abstract.__tryExtend(controllerName, controllerObject.inherits, controllerObject);
-    }
-
-    app.log('Registering controller {0}', [controllerName]);
-    app.debug('Invoke controller.register with params: {0} {1}', [controllerName, controllerObject]);
-
-    //Setting tyope of module
-    controllerObject.__type = 'CONTROLLER';
-
-    //Setting self helper
-    controllerObject.self = function () {
-      return app.controller[controllerName];
-    }
-
-    //Setting @public checkNetwork to false if not defined
-    if (!controllerObject.checkNetwork) {
-      controllerObject.checkNetwork = false;
-    }
-
-    //Setting @public components to empty array if not defined
-    if (!controllerObject.components) {
-      controllerObject.components = [];
-    }
-
-    //Setting original name of module
-    controllerObject.__name = controllerName;
-
-    //Setting name starting from lower case , used with templates and directories names of controller
-    controllerObject.__lowerCaseName = controllerName.substring(0, 1).toLowerCase() + controllerName.substring(1, controllerName.length);
-
-
     /**
      * @private
-     *
-     * Function that renders controller
-     * Creates new controller object based ond __dataArchive and assign reference to shortcut app.ctx
-     * Creates controller HTML template using @function @private __loadTemplate()
-     * Passing controller processed template to DOM element with @attr view attribute
-     * Rendering components used in rendered controller
-     * Invalidating existing modals
-     * Initializing controller with controllerPassedData
-     * @param controllerPassedData
+     * Storage for controllers instances
      */
-    controllerObject.__render = function (controllerPassedData) {
-      app.debug('Invoke controllerObject.__render with params: {0}', [controllerPassedData]);
-
-      app.controller[controllerObject.__name] = $.extend(true, {}, app.controller.__dataArchive[controllerObject.__name]);
-
-      var __oldControllerName = app.ctx ? app.ctx.__name : null;
-
-      app.ctx = app.controller[controllerObject.__name];
-
-      app.ctx.__loadTemplate();
-
-      app.currentController = controllerObject.__name.toLowerCase();
-
-      app.debug('Binding controller {0} template to DOM element with "view" attribute ', [app.ctx.__name]);
-
-      if (app.config.transitions && app.config.transitionAnimation) {
-
-        var transitionViewId = 'transition-view' + app.util.System.hash();
-
-        app.controller.__getView().before('<div style="display: none;" id="' + transitionViewId + '">' + app.controller.__getView().html() + '</div>');
-        app.controller.__getView().html(app.ctx.__template);
-
-        app.config.transitionAnimation($('#' + transitionViewId), app.controller.__getView(), app.__starting, __oldControllerName, app.ctx.__name, function () {
-          $('#' + transitionViewId).remove();
-        });
-
-      } else {
-        app.controller.__getView().html(app.ctx.__template);
-      }
-
-      //Translate DOM
-      app.message.__translate();
-
-      app.component.__initComponents(app.ctx.components);
-
-      app.modal.invalidateAll();
-
-      app.debug('Invoke controller {0} init() function', [app.ctx.__name]);
-      app.ctx.init(controllerPassedData);
-
-    };
+    __dataArchive: {},
 
     /**
-     * @private
+     * @public
      *
-     * Creating path to controller view HTML file
-     * Creates path based on html2js template file and directories structure
+     * Substitute method for register
+     *
+     * @param controllerName
      * @param controllerObject
      */
-    controllerObject.__createControllerViewPath = function (controllerObject) {
-      app.debug('Invoke controllerObject.__createControllerViewPath with params: {0}', [controllerObject]);
+    add: function (controllerName, controllerObject) {
+        this.register(controllerName, controllerObject);
+    },
 
-      controllerObject.__view = app.config.rootPath + "/" + app.config.controllerDirectory + "/" + controllerObject.__lowerCaseName + "/" + controllerObject.__lowerCaseName + ".view.html"
+    /**
+     * @public
+     *
+     * Registering new controller in application
+     * Creates controller object
+     *
+     * @param controllerName
+     * @param controllerObject
+     */
+    register: function (controllerName, controllerObject) {
 
-    }
+        // Filter if name is invalid (can break application)
+        app.system.__filterRestrictedNames(controllerName);
+
+        if (controllerObject.inherits) {
+            // Apply extending from abstracts
+            controllerObject = app.abstract.__tryExtend(controllerName, controllerObject.inherits, controllerObject);
+        }
+
+        app.log('Registering controller {0}', [controllerName]);
+        app.debug('Invoke controller.register with params: {0} {1}', [controllerName, controllerObject]);
+
+        //Setting tyope of module
+        controllerObject.__type = 'CONTROLLER';
+
+        //Setting self helper
+        controllerObject.self = function () {
+            return app.controller[controllerName];
+        }
+
+        //Setting @public checkNetwork to false if not defined
+        if (!controllerObject.checkNetwork) {
+            controllerObject.checkNetwork = false;
+        }
+
+        //Setting @public components to empty array if not defined
+        if (!controllerObject.components) {
+            controllerObject.components = [];
+        }
+
+        //Setting original name of module
+        controllerObject.__name = controllerName;
+
+        //Setting name starting from lower case , used with templates and directories names of controller
+        controllerObject.__lowerCaseName = controllerName.substring(0, 1).toLowerCase() + controllerName.substring(1, controllerName.length);
+
+
+        /**
+         * @private
+         *
+         * Function that renders controller
+         * Creates new controller object based ond __dataArchive and assign reference to shortcut app.ctx
+         * Creates controller HTML template using @function @private __loadTemplate()
+         * Passing controller processed template to DOM element with @attr view attribute
+         * Rendering components used in rendered controller
+         * Invalidating existing modals
+         * Initializing controller with controllerPassedData
+         * @param controllerPassedData
+         */
+        controllerObject.__render = function (controllerPassedData) {
+            app.debug('Invoke controllerObject.__render with params: {0}', [controllerPassedData]);
+
+            app.controller[controllerObject.__name] = $.extend(true, {}, app.controller.__dataArchive[controllerObject.__name]);
+
+            var __oldControllerName = app.ctx ? app.ctx.__name : null;
+
+            app.ctx = app.controller[controllerObject.__name];
+
+            app.ctx.__loadTemplate();
+
+            app.currentController = controllerObject.__name.toLowerCase();
+
+            app.debug('Binding controller {0} template to DOM element with "view" attribute ', [app.ctx.__name]);
+
+            if (app.config.transitions && app.config.transitionAnimation) {
+
+                var transitionViewId = 'transition-view' + app.util.System.hash();
+
+                app.controller.__getView().before('<div style="display: none;" id="' + transitionViewId + '">' + app.controller.__getView().html() + '</div>');
+                app.controller.__getView().html(app.ctx.__template);
+
+                app.config.transitionAnimation($('#' + transitionViewId), app.controller.__getView(), app.__starting, __oldControllerName, app.ctx.__name, function () {
+                    $('#' + transitionViewId).remove();
+                });
+
+            } else {
+                app.controller.__getView().html(app.ctx.__template);
+            }
+
+            //Translate DOM
+            app.message.__translate();
+
+            //Binds spike events
+            app.system.__bindEvents(app.controller.__getView());
+
+            app.component.__initComponents(app.ctx.components);
+
+            app.modal.invalidateAll();
+
+            app.debug('Invoke controller {0} init() function', [app.ctx.__name]);
+            app.ctx.init(controllerPassedData);
+
+        };
+
+        /**
+         * @private
+         *
+         * Creating path to controller view HTML file
+         * Creates path based on html2js template file and directories structure
+         * @param controllerObject
+         */
+        controllerObject.__createControllerViewPath = function (controllerObject) {
+            app.debug('Invoke controllerObject.__createControllerViewPath with params: {0}', [controllerObject]);
+
+            controllerObject.__view = app.config.rootPath + "/" + app.config.controllerDirectory + "/" + controllerObject.__lowerCaseName + "/" + controllerObject.__lowerCaseName + ".view.html"
+
+        }
+
+        /**
+         * @private
+         *
+         * Function retrieving controller's template from global window[templates] variable based on generated view path
+         * If template not specified, throw Error
+         * Creating dynamic selectors binded to template using @private system.__createSelectors()
+         *
+         */
+        controllerObject.__loadTemplate = function () {
+            app.debug('Invoke controllerObject.__loadTemplate');
+
+            var templateHtml = window[app.__globalTemplates][app.ctx.__view];
+
+            if (!templateHtml) {
+                app.system.__throwError('No view found for controller: {0}, view path: {1}', [controllerObject.__name, controllerObject.__view]);
+            }
+
+            //Executing template function
+            try {
+                templateHtml = templateHtml();
+            } catch (err) {
+                app.system.__throwError('Error occured when executing controller {0} template {1}', [controllerObject.__name, controllerObject.__view]);
+            }
+
+            //Includes static templates
+            templateHtml = app.system.__replacePlainTemplates(templateHtml);
+
+            var selectorsObj = app.system.__createSelectors(templateHtml);
+            app.ctx.selector = selectorsObj.selectors;
+            templateHtml = selectorsObj.html;
+
+            if (app.config.replaceLangKeys) {
+                templateHtml = app.message.__replaceTemplateKeys(templateHtml);
+            }
+
+            app.ctx.__plainTemplate = templateHtml;
+            app.ctx.__template = templateHtml;
+
+            //Commented because of global translation by jQuery
+            //app.ctx.__template = app.message.__replace(templateHtml);
+
+        }
+
+        //Creating view path once per application initialization
+        controllerObject.__createControllerViewPath(controllerObject);
+
+        //Creating copy of controller object in @private __dataArchive and in controller[controllerName]
+        app.controller.__dataArchive[controllerName] = $.extend(true, {}, controllerObject);
+        app.controller[controllerName] = $.extend(true, {}, controllerObject);
+
+    },
 
     /**
      * @private
      *
-     * Function retrieving controller's template from global window[templates] variable based on generated view path
-     * If template not specified, throw Error
-     * Creating dynamic selectors binded to template using @private system.__createSelectors()
+     * Returns controller's DOM element with @attr view attribute
+     *
+     * @returns {jQuery|HTMLElement}
+     */
+    __getView: function () {
+        return app.system.getView();
+    },
+
+    /**
+     * @private
+     *
+     * Verify if DOM element with @attr view attribute exists
      *
      */
-    controllerObject.__loadTemplate = function () {
-      app.debug('Invoke controllerObject.__loadTemplate');
-
-      var templateHtml = window[app.__globalTemplates][app.ctx.__view];
-
-      if (!templateHtml) {
-        app.system.__throwError('No view found for controller: {0}, view path: {1}', [controllerObject.__name, controllerObject.__view]);
-      }
-
-      var selectorsObj = app.system.__createSelectors(templateHtml);
-      app.ctx.selector = selectorsObj.selectors;
-      templateHtml = selectorsObj.html;
-
-      if (app.config.replaceLangKeys) {
-        templateHtml = app.message.__replaceTemplateKeys(templateHtml);
-      }
-
-      app.ctx.__plainTemplate = templateHtml;
-      app.ctx.__template = templateHtml;
-
-      //Commented because of global translation by jQuery
-      //app.ctx.__template = app.message.__replace(templateHtml);
-
+    __verifyView: function () {
+        if (this.__getView().length == 0) {
+            app.system.__throwError('No DOM element with {0} attribute specified', [app.__attributes.VIEW]);
+        }
     }
-
-    //Creating view path once per application initialization
-    controllerObject.__createControllerViewPath(controllerObject);
-
-    //Creating copy of controller object in @private __dataArchive and in controller[controllerName]
-    app.controller.__dataArchive[controllerName] = $.extend(true, {}, controllerObject);
-    app.controller[controllerName] = $.extend(true, {}, controllerObject);
-
-  },
-
-  /**
-   * @private
-   *
-   * Returns controller's DOM element with @attr view attribute
-   *
-   * @returns {jQuery|HTMLElement}
-   */
-  __getView: function () {
-    return app.system.getView();
-  },
-
-  /**
-   * @private
-   *
-   * Verify if DOM element with @attr view attribute exists
-   *
-   */
-  __verifyView: function () {
-    if (this.__getView().length == 0) {
-      app.system.__throwError('No DOM element with {0} attribute specified', [app.__attributes.VIEW]);
-    }
-  }
 
 };
 
@@ -2852,736 +2964,455 @@ app.controller = {
  */
 app.modal = {
 
-  /**
-   * @private
-   * Storage for wrapping DIVs
-   * If modal wrapper @attr id not in @private __modalWrappers then modal not exist in DOM
-   */
-  __modalWrappers: {},
+    /**
+     * @private
+     * Storage for wrapping DIVs
+     * If modal wrapper @attr id not in @private __modalWrappers then modal not exist in DOM
+     */
+    __modalWrappers: {},
 
-  /**
-   * @private
-   * Storage for modals instances
-   */
-  __dataArchive: {},
+    /**
+     * @private
+     * Storage for modals instances
+     */
+    __dataArchive: {},
 
-  /**
-   * @public
-   *
-   * Function allows programmer to implement custom modals overriding
-   * @private __onModalShowEvent
-   * @private __onModalHideEvent
-   * @private __onModalRegisterEvent
-   * @private __onModalRenderEvent
-   *
-   * @param eventName
-   * @param eventFunction
-   */
-  implement: function (eventName, eventFunction) {
-    app.debug('Invoke modal.implement with params: {0} {1}', [eventName, eventFunction]);
+    /**
+     * @public
+     *
+     * Function allows programmer to implement custom modals overriding
+     * @private __onModalShowEvent
+     * @private __onModalHideEvent
+     * @private __onModalRegisterEvent
+     * @private __onModalRenderEvent
+     *
+     * @param eventName
+     * @param eventFunction
+     */
+    implement: function (eventName, eventFunction) {
+        app.debug('Invoke modal.implement with params: {0} {1}', [eventName, eventFunction]);
 
-    if (!eventName || !eventFunction) {
-      app.system.__throwError('modal.implement(eventName, eventFunction) passed arguments not match required arguments');
-    }
+        if (!eventName || !eventFunction) {
+            app.system.__throwError('modal.implement(eventName, eventFunction) passed arguments not match required arguments');
+        }
 
-    if (eventName == 'hide') {
-      app.modal.__onModalHideEvent = eventFunction;
-    } else if (eventName == 'show') {
-      app.modal.__onModalShowEvent = eventFunction;
-    } else if (eventName == 'render') {
-      app.modal.__onModalRenderEvent = eventFunction;
-    } else if (eventName == 'register') {
-      app.modal.__onModalRegisterEvent = eventFunction;
-    } else {
-      app.warn('Ignoring event: {0} implementation for modal, no event available', [eventName]);
-    }
+        if (eventName == 'hide') {
+            app.modal.__onModalHideEvent = eventFunction;
+        } else if (eventName == 'show') {
+            app.modal.__onModalShowEvent = eventFunction;
+        } else if (eventName == 'render') {
+            app.modal.__onModalRenderEvent = eventFunction;
+        } else if (eventName == 'register') {
+            app.modal.__onModalRegisterEvent = eventFunction;
+        } else {
+            app.warn('Ignoring event: {0} implementation for modal, no event available', [eventName]);
+        }
 
-  },
-
-  /**
-   * @private
-   *
-   * Default jQuery implementation of modal show event
-   *
-   * @param modalSelector
-   */
-  __onModalShowEventDefault: function (modalSelector) {
-    app.debug('Invoke modal.__onModalShowEventDefault');
-    modalSelector.show(200);
-  },
-
-  /**
-   * @private
-   *
-   * Default jQuery implementation of modal hide event
-   *
-   * @param modalSelector
-   */
-  __onModalHideEventDefault: function (modalSelector) {
-    app.debug('Invoke modal.__onModalHideEventDefault');
-    modalSelector.hide(200);
-  },
-
-  /**
-   * @private
-   * @toImplement
-   *
-   * Additional function executed when modal is registered
-   * Executes once per Spike application initialization
-   *
-   * @param modalObject
-   */
-  __onModalRegisterEvent: function (modalObject) {
-  },
-
-  /**
-   * @private
-   * @toImplement
-   *
-   * Additional function executed when modal is rendered
-   * Executes every time when new modal instance is rendered
-   * Is not invoke if modal is already rendered and will be only showed
-   *
-   * @param modalSelector
-   */
-  __onModalRenderEvent: function (modalSelector, modalObject) {
-  },
-
-  /**
-   * @private
-   * @toImplement
-   *
-   * Function implements modal showing mechanics
-   * By default invokes default implementation @private __onModalShowEventDefault
-   *
-   * @param modalSelector
-   * @param modalObject
-   * @param defaultImpl
-   */
-  __onModalShowEvent: function (modalSelector, modalObject, defaultImpl) {
-    defaultImpl(modalSelector);
-  },
-
-  /**
-   * @private
-   * @toImplement
-   *
-   * Function implements modal hiding mechanics
-   * By default invokes default implementation @private __onModalHideEventDefault
-   *
-   * @param modalSelector
-   * @param modalObject
-   * @param defaultImpl
-   */
-  __onModalHideEvent: function (modalSelector, modalObject, defaultImpl) {
-    defaultImpl(modalSelector);
-  },
-
-  /**
-   * @public
-   *
-   * Substitute method for register
-   *
-   * @param modalName
-   * @param modalObject
-   */
-  add: function (modalName, modalObject) {
-    this.register(modalName, modalObject);
-  },
-
-  /**
-   * @public
-   *
-   * Registering new modal window in application
-   * Creates modal object
-   *
-   * @param modalName
-   * @param modalObject
-   */
-  register: function (modalName, modalObject) {
-
-    // Filter if name is invalid (can break application)
-    app.system.__filterRestrictedNames(modalName);
-
-    if (modalObject.inherits) {
-      // Apply extending from abstracts
-      modalObject = app.abstract.__tryExtend(modalName, modalObject.inherits, modalObject);
-    }
-
-    app.debug('Invoke modal.register with params: {0} {1}', [modalName, modalObject]);
-
-    //Setting tyope of module
-    modalObject.__type = 'MODAL';
-
-    //Setting self helper
-    modalObject.self = function () {
-      return app.modal[modalName];
-    }
-
-    //Setting default value (modal by default is hidden)
-    modalObject.__hidden = false;
-
-    //Setting original name of module
-    modalObject.__name = modalName;
-
-    //Setting name starting from lower case , used with templates and directories names of controller
-    modalObject.__lowerCaseName = modalName.substring(0, 1).toLowerCase() + modalName.substring(1, modalName.length);
-
-    //Invokes custom implementation of @private __onModalRegisterEvent
-    app.modal.__onModalRegisterEvent(modalObject);
+    },
 
     /**
      * @private
      *
-     * Creating path to modal view HTML file
-     * Creates path based on html2js template file and directories structure
+     * Default jQuery implementation of modal show event
+     *
+     * @param modalSelector
+     */
+    __onModalShowEventDefault: function (modalSelector) {
+        app.debug('Invoke modal.__onModalShowEventDefault');
+        modalSelector.show(200);
+    },
+
+    /**
+     * @private
+     *
+     * Default jQuery implementation of modal hide event
+     *
+     * @param modalSelector
+     */
+    __onModalHideEventDefault: function (modalSelector) {
+        app.debug('Invoke modal.__onModalHideEventDefault');
+        modalSelector.hide(200);
+    },
+
+    /**
+     * @private
+     * @toImplement
+     *
+     * Additional function executed when modal is registered
+     * Executes once per Spike application initialization
+     *
      * @param modalObject
      */
-    modalObject.__createModalViewPath = function (modalObject) {
-      app.debug('Invoke modalObject.__createModalViewPath with params: {0}', [modalObject]);
-
-      modalObject.__view = app.config.rootPath + "/" + app.config.modalDirectory + "/" + modalObject.__lowerCaseName + "/" + modalObject.__lowerCaseName + ".view.html"
-
-    }
+    __onModalRegisterEvent: function (modalObject) {
+    },
 
     /**
      * @private
+     * @toImplement
      *
-     * Function retrieving modal's template from global window[templates] variable based on generated view path
-     * If template not specified, throw Error
-     * Creating dynamic selectors binded to template using @private system.__createSelectors()
+     * Additional function executed when modal is rendered
+     * Executes every time when new modal instance is rendered
+     * Is not invoke if modal is already rendered and will be only showed
      *
+     * @param modalSelector
      */
-    modalObject.__loadTemplate = function () {
-      app.debug('Invoke modalObject.__loadTemplate');
-
-      var templateHtml = window[app.__globalTemplates][app.mCtx[modalObject.__name].__view];
-
-      if (!templateHtml) {
-        app.system.__throwError('No view found for modal: {0}, view path: {1}', [modalObject.__name, modalObject.__view]);
-      }
-
-      var selectorsObj = app.system.__createSelectors(templateHtml);
-      app.mCtx[modalObject.__name].selector = selectorsObj.selectors;
-
-      templateHtml = selectorsObj.html;
-
-      if (app.config.replaceLangKeys) {
-        templateHtml = app.message.__replaceTemplateKeys(templateHtml);
-      }
-
-      app.mCtx[modalObject.__name].__plainTemplate = templateHtml;
-
-      app.mCtx[modalObject.__name].__template = templateHtml;
-      //Commented because of global translation by jQuery
-      //app.mCtx[modalObject.__name].__template = app.message.__replace(templateHtml);
-
-    }
+    __onModalRenderEvent: function (modalSelector, modalObject) {
+    },
 
     /**
      * @private
+     * @toImplement
      *
-     * Function that renders modal
-     * Checking if modal is already rendered in DOM and if is hidden - then show again only
-     * Checking if modal is already rendered in DOM and if is visible - then do nothing
-     * In case modal is not rendered then
-     * Creates new modal object based ond __dataArchive and assign reference to shortcut app.mCtx
-     * Creates controller HTML template using @function @private __loadTemplate()
-     * Wrapping modal with new DIV element and creating @attr id for modal wrapper and modal view fist child (main)
-     * Passing modal processed and wrapped template to DOM element with @attr modals attribute
-     * Rendering components used in rendered modal
-     * Initializing modal with modalPassedData
+     * Function implements modal showing mechanics
+     * By default invokes default implementation @private __onModalShowEventDefault
      *
-     * @param modalPassedData
+     * @param modalSelector
+     * @param modalObject
+     * @param defaultImpl
      */
-    modalObject.__render = function (modalPassedData) {
-      app.debug('Invoke modalObject.__render with params: {0}', [modalPassedData]);
-
-      app.modal[modalObject.__name] = $.extend(true, {}, app.modal.__dataArchive[modalObject.__name]);
-      app.mCtx[modalObject.__name] = app.modal[modalObject.__name];
-
-      app.mCtx[modalObject.__name].__loadTemplate();
-
-      app.debug('Binding modal {0} template to DOM element with "modals" attribute ', [app.mCtx[modalObject.__name].__name]);
-
-      app.mCtx[modalObject.__name].__wrapModal();
-
-      app.component.__initComponents(app.mCtx[modalObject.__name].components);
-
-      app.modal.__modalWrappers[modalObject.__name] = app.modal[modalObject.__name].__modalWrapperId;
-
-      app.debug('Invoke modal {0} init() function', [app.mCtx[modalObject.__name].__name]);
-      app.mCtx[modalObject.__name].init(modalPassedData);
-
-    };
+    __onModalShowEvent: function (modalSelector, modalObject, defaultImpl) {
+        defaultImpl(modalSelector);
+    },
 
     /**
      * @private
+     * @toImplement
      *
-     * Function creates @private modalObject.__modalWrapperId as @attr id for DIV element wrapping modal template
-     * Also first child of modal template has @private modalObject.__modalId as @attr id
-     * Executing @private modal.__onModalRenderEvent for custom modal render implementation
+     * Function implements modal hiding mechanics
+     * By default invokes default implementation @private __onModalHideEventDefault
      *
+     * @param modalSelector
+     * @param modalObject
+     * @param defaultImpl
      */
-    modalObject.__wrapModal = function () {
-
-      app.mCtx[modalObject.__name].__modalWrapperId = 'modal-wrapper-' + app.util.System.hash();
-
-      app.modal.__getView().append('<div id="' + app.mCtx[modalObject.__name].__modalWrapperId.replace('#', '') + '">' + app.mCtx[modalObject.__name].__template + '</div>');
-
-      //Translate DOM
-      app.message.__translate();
-
-      app.mCtx[modalObject.__name].__modalId = 'modal-' + app.util.System.hash();
-
-      var modalSelector = app.mCtx[modalObject.__name].__getWrapperModalSelector();
-      modalSelector.attr('id', app.mCtx[modalObject.__name].__modalId);
-
-      app.modal.__onModalRenderEvent(modalSelector, app.mCtx[modalObject.__name]);
-
-    }
-
-    /**
-     * @private
-     *
-     * Returns modal wrapper DIV element
-     *
-     * @returns {jQuery|HTMLElement}
-     */
-    modalObject.__wrapperSelector = function () {
-      return $('#' + app.modal[modalObject.__name].__modalWrapperId);
-    }
-
-    /**
-     * @private
-     *
-     * Returns modal element (parent)
-     *
-     * @returns {jQuery|HTMLElement}
-     */
-    modalObject.__selfSelector = function () {
-      return $('#' + app.modal[modalObject.__name].__modalId);
-    }
-
-    /**
-     * @private
-     *
-     * Returns modal wrapper children - modal view parent element
-     * Checks if modal template has more than one parent elements or if even has
-     *
-     * @returns {jQuery|HTMLElement}
-     */
-    modalObject.__getWrapperModalSelector = function () {
-
-      var wrapperSelectorChildrens = app.modal[modalObject.__name].__wrapperSelector().children();
-
-      if (wrapperSelectorChildrens.length == 1) {
-        return wrapperSelectorChildrens;
-      } else if (wrapperSelectorChildrens.length > 1) {
-        app.system.__throwError('Modal {0} view can only have one parent DOM element, found {1}', [modalObject.__name, wrapperSelectorChildrens.length]);
-      } else if (wrapperSelectorChildrens.length == 0) {
-        app.system.__throwError('Modal {0} view must have one parent DOM element', [modalObject.__name]);
-      }
-
-    }
-
-    /**
-     * @public
-     *
-     * Sets @private modalObject.__hidden to false
-     * Invokes @private modal.__onModalShowEvent for default or custom implementation of modal showing mechanics
-     *
-     */
-    modalObject.show = function () {
-
-      app.modal[modalObject.__name].__hidden = false;
-      app.modal.__onModalShowEvent(app.mCtx[modalObject.__name].__selfSelector(), app.mCtx[modalObject.__name], app.modal.__onModalShowEventDefault);
-    };
-
-    /**
-     * @public
-     *
-     * Sets @private modalObject.__hidden to true
-     * Invokes @private modal.__onModalHideEvent for default or custom implementation of modal hidding mechanics
-     *
-     */
-    modalObject.hide = function () {
-
-      app.modal[modalObject.__name].__hidden = true;
-      app.modal.__onModalHideEvent(app.mCtx[modalObject.__name].__selfSelector(), app.mCtx[modalObject.__name], app.modal.__onModalHideEventDefault);
-    };
-
-    modalObject.__createModalViewPath(modalObject);
-
-    //Creating copy of modal object in @private __dataArchive and in modal[modalName] variable
-    app.modal.__dataArchive[modalObject.__name] = $.extend(true, {}, modalObject);
-    app.modal[modalObject.__name] = $.extend(true, {}, modalObject);
-
-
-  },
-
-  /**
-   * @private
-   *
-   * Returns modal's DOM element with @attr modals attribute
-   *
-   * @returns {jQuery|HTMLElement}
-   */
-  __getView: function () {
-    return $('[' + app.__attributes.MODALS + ']');
-  },
-
-  /**
-   * @private
-   *
-   * Verify if DOM element with @attr modals attribute exists
-   *
-   */
-  __verifyView: function () {
-    if (this.__getView().length == 0) {
-      app.system.__throwError('No DOM element with {0} attribute specified', [app.__attributes.MODALS]);
-    }
-  },
-
-  /**
-   * @private
-   *
-   * Function removes modal wrapper @attr id @private modalObject.__modalWrapperId from @private modal.__modalWrappers
-   * Removes whole wrapper modal DOM element with selector @private modalObject.__wrapperSelector
-   *
-   */
-  __invalidate: function (modalObject) {
-
-    delete app.modal.__modalWrappers[modalObject.__name];
-    modalObject.__wrapperSelector().remove();
-
-  },
-
-  /**
-   * @public
-   *
-   * Function invalidates all rendered modals.
-   * Iterates over @public modal executes @private modal.__invalidate function to remove modals from DOM and cache
-   *
-   */
-  invalidateAll: function () {
-
-    $.each(app.modal, function (modalName, modalObject) {
-
-      if (modalObject instanceof Object && modalObject['__type']) {
-        app.modal.__invalidate(modalObject);
-      }
-
-    });
-
-  },
-
-  /**
-   * @public
-   *
-   * Function hides all rendered modals.
-   * Iterates over @public app.mCtx executes @public modal.hide function to hide modals
-   *
-   */
-  hideAll: function () {
-
-    $.each(app.mCtx, function (modalName, modalObject) {
-      modalObject.hide();
-    });
-
-  }
-
-};/**
- * @public
- *
- * Lister module
- * Module designed for usage as list renderer.
- * Can be used in any another module ex. controller, component, modal.
- *
- * Template function can also handle another lister (beware of infinite loop if the same listers used in each others).
- *
- * Redered in normal code execution time.
- * Rendered template is binded to DOM element with passed selector.
- *
- * Example:
- * <ul id="listNameXXX"></ul>
- *
- * @functions
- * @public  {add}
- * @public  {register}
- *
- */
-app.lister = {
+    __onModalHideEvent: function (modalSelector, modalObject, defaultImpl) {
+        defaultImpl(modalSelector);
+    },
 
     /**
      * @public
      *
      * Substitute method for register
      *
-     * @param listerName
-     * @param listerTemplate
-     * @param configuration { renderPerContext, transform }
+     * @param modalName
+     * @param modalObject
      */
-    add: function (listerName, listerTemplate, configuration) {
-        this.register(listerName, listerTemplate, configuration);
+    add: function (modalName, modalObject) {
+        this.register(modalName, modalObject);
     },
 
     /**
      * @public
      *
-     * Registering new lister in application
-     * Creates lister object
+     * Registering new modal window in application
+     * Creates modal object
      *
-     * @param listerName
-     * @param listerTemplate
-     * @param configuration {
-     *  renderPerContext -- additional but slower way to render list, passing item and index to rendering function
-     *  transform  -- additional function to transform passed list items during rendering template, to modyfiy them
-     * }
+     * @param modalName
+     * @param modalObject
      */
-    register: function (listerName, listerTemplate, configuration) {
+    register: function (modalName, modalObject) {
 
-        var htmlTemplate = null;
+        // Filter if name is invalid (can break application)
+        app.system.__filterRestrictedNames(modalName);
 
-        //If no configuration passed, default options is applied
-        if (!configuration) {
-            configuration = {
-                renderPerContext: false,
-                transformSingle: null,
-                transformArray: null
-            }
+        if (modalObject.inherits) {
+            // Apply extending from abstracts
+            modalObject = app.abstract.__tryExtend(modalName, modalObject.inherits, modalObject);
         }
 
-        //If no renderPerContext passed, setted by default to false
-        if (!configuration.renderPerContext) {
-            configuration.renderPerContext = false;
+        app.debug('Invoke modal.register with params: {0} {1}', [modalName, modalObject]);
+
+        //Setting tyope of module
+        modalObject.__type = 'MODAL';
+
+        //Setting self helper
+        modalObject.self = function () {
+            return app.modal[modalName];
         }
 
-        //If no transform function passed, setted by default to null
-        if (!configuration.transformSingle) {
-            configuration.transformSingle = null;
-        }
+        //Setting default value (modal by default is hidden)
+        modalObject.__hidden = false;
 
-        //If no transform function passed, setted by default to null
-        if (!configuration.transformArray) {
-            configuration.transformArray = null;
-        }
+        //Setting original name of module
+        modalObject.__name = modalName;
 
-        //If template is another than string version (simplest) and renderPerContext is false then
-        if (typeof listerTemplate !== 'string' && configuration.renderPerContext == false) {
-            htmlTemplate = listerTemplate('');
-        } else {
-            htmlTemplate = listerTemplate;
-        }
+        //Setting name starting from lower case , used with templates and directories names of controller
+        modalObject.__lowerCaseName = modalName.substring(0, 1).toLowerCase() + modalName.substring(1, modalName.length);
 
-        //Commented because of global translation by jQuery
-        //htmlTemplate = app.message.__replace(htmlTemplate);
+        //Invokes custom implementation of @private __onModalRegisterEvent
+        app.modal.__onModalRegisterEvent(modalObject);
 
         /**
          * @private
          *
-         * Lister object used to rendering lists
+         * Creating path to modal view HTML file
+         * Creates path based on html2js template file and directories structure
+         * @param modalObject
+         */
+        modalObject.__createModalViewPath = function (modalObject) {
+            app.debug('Invoke modalObject.__createModalViewPath with params: {0}', [modalObject]);
+
+            modalObject.__view = app.config.rootPath + "/" + app.config.modalDirectory + "/" + modalObject.__lowerCaseName + "/" + modalObject.__lowerCaseName + ".view.html"
+
+        }
+
+        /**
+         * @private
          *
-         * @functions
-         *
-         * @public { render }
-         * @private { __update }
-         * @private { __renderElement }
-         *
-         *
-         * @fields
-         * @private { __renderPerContext }
-         * @private { __template }
-         * @private { __dataIds }
-         * @private { __bindings }
-         * @private { __listSelector }
-         * @private { __data }
+         * Function retrieving modal's template from global window[templates] variable based on generated view path
+         * If template not specified, throw Error
+         * Creating dynamic selectors binded to template using @private system.__createSelectors()
          *
          */
-        var __listerObject = {
+        modalObject.__loadTemplate = function () {
+            app.debug('Invoke modalObject.__loadTemplate');
 
-            __listerName: listerName,
-            __renderPerContext: configuration.renderPerContext,
-            __transformArray: configuration.transformArray,
-            __transformSingle: configuration.transformSingle,
-            __template: htmlTemplate,
-            __dataIds: null,
-            __bindings: null,
-            __listSelector: null,
-            __data: null,
+            var templateHtml = window[app.__globalTemplates][app.mCtx[modalObject.__name].__view];
 
-            /**
-             * @private
-             *
-             * Renders single list element based on passed params
-             * Replacing plain @attr text and @attr event
-             *
-             * @param dataId
-             * @param listElementId
-             * @param html
-             * @param element
-             * @returns {string|*}
-             * @private
-             */
-            __renderElement: function (dataId, listElementId, html, element) {
+            if (!templateHtml) {
+                app.system.__throwError('No view found for modal: {0}, view path: {1}', [modalObject.__name, modalObject.__view]);
+            }
 
-                if (!html || html.trim().length === 0) {
-                    app.system.__throwWarn(app.system.__messages.LISTER_ELEMENT_EMPTY, [listElementId]);
-                }
+            //Executing template function
+            try {
+                templateHtml = templateHtml();
+            } catch (err) {
+                app.system.__throwError('Error occured when executing modal {0} template {1}', [modalObject.__name, modalObject.__view]);
+            }
 
-                html = html.replace('>', ' liId="' + listElementId + '" >');
-                html = html.split(app.__attributes.LISTER_EVENT + '(').join(' dataId="' + dataId + '" ' + app.__attributes.LISTER_EVENT + '(');
+            //Includes static templates
+            templateHtml = app.system.__replacePlainTemplates(templateHtml);
 
-                for (var prop in element) {
-                    html = html.split(app.__attributes.LISTER_TEXT + '(' + prop + ')').join(element[prop]);
-                }
+            var selectorsObj = app.system.__createSelectors(templateHtml);
+            app.mCtx[modalObject.__name].selector = selectorsObj.selectors;
 
-                return html;
+            templateHtml = selectorsObj.html;
 
-            },
+            if (app.config.replaceLangKeys) {
+                templateHtml = app.message.__replaceTemplateKeys(templateHtml);
+            }
 
-            /**
-             * @private
-             *
-             * Function gets template and process it with passed data
-             *
-             * @param templateName
-             * @param localData
-             */
-            // __resolveListerTemplate: function(templateName, localData){
-            //
-            //     if(!window[app.__globalTemplates][templateName]){
-            //         app.system.__throwError(app.system.__messages.TEMPLATE_NOT_FOUND_ERROR, [templateName])
-            //     }
-            //
-            //     return window[app.__globalTemplates][templateName](localData);
-            //
-            // },
+            app.mCtx[modalObject.__name].__plainTemplate = templateHtml;
 
-            /**
-             * @public
-             *
-             * Main function to render whole lister data with passed template and binded events.
-             * Also can handle additional callback realized after whole process is done.
-             *
-             * @param listSelector -- must be jQuery selector
-             * @param data -- list of objects with fields names as used in text(fieldName) tags in template
-             * @param bindings -- optional, object with functions named as used in event(functionName) tags in template
-             * @param options -- optional
-             *  - callback --optional
-             */
-            render: function (listSelector, data, bindings, options) {
+            app.mCtx[modalObject.__name].__template = templateHtml;
+            //Commented because of global translation by jQuery
+            //app.mCtx[modalObject.__name].__template = app.message.__replace(templateHtml);
 
-                var __this = this;
+        }
 
-                var elementsHtml = [];
+        /**
+         * @private
+         *
+         * Function that renders modal
+         * Checking if modal is already rendered in DOM and if is hidden - then show again only
+         * Checking if modal is already rendered in DOM and if is visible - then do nothing
+         * In case modal is not rendered then
+         * Creates new modal object based ond __dataArchive and assign reference to shortcut app.mCtx
+         * Creates controller HTML template using @function @private __loadTemplate()
+         * Wrapping modal with new DIV element and creating @attr id for modal wrapper and modal view fist child (main)
+         * Passing modal processed and wrapped template to DOM element with @attr modals attribute
+         * Rendering components used in rendered modal
+         * Initializing modal with modalPassedData
+         *
+         * @param modalPassedData
+         */
+        modalObject.__render = function (modalPassedData) {
+            app.debug('Invoke modalObject.__render with params: {0}', [modalPassedData]);
 
-                var dataIds = [];
+            app.modal[modalObject.__name] = $.extend(true, {}, app.modal.__dataArchive[modalObject.__name]);
+            app.mCtx[modalObject.__name] = app.modal[modalObject.__name];
 
-                var templatehtml = __this.__template;
+            app.mCtx[modalObject.__name].__loadTemplate();
 
-                var html = templatehtml;
+            app.debug('Binding modal {0} template to DOM element with "modals" attribute ', [app.mCtx[modalObject.__name].__name]);
 
-                if (__this.__transformArray) {
-                    data = __this.__transformArray(data, options);
-                }
+            app.mCtx[modalObject.__name].__wrapModal();
 
-                if (__this.__transformSingle) {
-                    $.each(data, function (i, item) {
-                        data[i] = __this.__transformSingle(item, options);
-                    });
-                }
+            app.component.__initComponents(app.mCtx[modalObject.__name].components);
 
-                $.each(data, function (i, element) {
+            app.modal.__modalWrappers[modalObject.__name] = app.modal[modalObject.__name].__modalWrapperId;
 
-                    if (__this.__renderPerContext) {
-                        html = templatehtml(i, element, '', data);
-                    }
+            app.debug('Invoke modal {0} init() function', [app.mCtx[modalObject.__name].__name]);
+            app.mCtx[modalObject.__name].init(modalPassedData);
 
-                    var listElementId = 'li-' + app.util.System.hash() + '-' + app.util.System.hash() + '-' + app.util.System.hash();
-                    var dataId = 'element-' + app.util.System.hash() + '-' + app.util.System.hash() + '-' + app.util.System.hash();
+        };
 
-                    html = __this.__renderElement(dataId, listElementId, html, element);
+        /**
+         * @private
+         *
+         * Function creates @private modalObject.__modalWrapperId as @attr id for DIV element wrapping modal template
+         * Also first child of modal template has @private modalObject.__modalId as @attr id
+         * Executing @private modal.__onModalRenderEvent for custom modal render implementation
+         *
+         */
+        modalObject.__wrapModal = function () {
 
-                    dataIds.push({
-                        __listElementId: listElementId,
-                        __dataId: dataId,
-                        __context: element
-                    });
+            app.mCtx[modalObject.__name].__modalWrapperId = 'modal-wrapper-' + app.util.System.hash();
 
-                    elementsHtml.push(html);
+            app.modal.__getView().append('<div id="' + app.mCtx[modalObject.__name].__modalWrapperId.replace('#', '') + '">' + app.mCtx[modalObject.__name].__template + '</div>');
 
-                    html = templatehtml;
+            //Translate DOM
+            app.message.__translate();
 
-                });
+            app.mCtx[modalObject.__name].__modalId = 'modal-' + app.util.System.hash();
 
-                html = '';
+            var modalSelector = app.mCtx[modalObject.__name].__getWrapperModalSelector();
+            modalSelector.attr('id', app.mCtx[modalObject.__name].__modalId);
 
-                for (var i = 0; i < elementsHtml.length; i++) {
-                    html += elementsHtml[i];
-                }
+            //Binds spike events
+            app.system.__bindEvents(modalSelector);
 
-                for (var prop in bindings) {
-                    html = html.split(app.__attributes.LISTER_EVENT + '(' + prop + ')').join(app.__attributes.LISTER_EVENT + '="' + prop + '"');
-                }
+            app.modal.__onModalRenderEvent(modalSelector, app.mCtx[modalObject.__name]);
 
-                listSelector.html(html);
+        }
 
-                //Translate DOM
-                app.message.__translate();
+        /**
+         * @private
+         *
+         * Returns modal wrapper DIV element
+         *
+         * @returns {jQuery|HTMLElement}
+         */
+        modalObject.__wrapperSelector = function () {
+            return $('#' + app.modal[modalObject.__name].__modalWrapperId);
+        }
 
-                if (options && options.callBack) {
-                    options.callBack();
-                }
+        /**
+         * @private
+         *
+         * Returns modal element (parent)
+         *
+         * @returns {jQuery|HTMLElement}
+         */
+        modalObject.__selfSelector = function () {
+            return $('#' + app.modal[modalObject.__name].__modalId);
+        }
 
-                __this.__bindings = bindings;
-                __this.__listSelector = listSelector;
-                __this.__data = data;
-                __this.__bind(listSelector, dataIds, bindings, data);
+        /**
+         * @private
+         *
+         * Returns modal wrapper children - modal view parent element
+         * Checks if modal template has more than one parent elements or if even has
+         *
+         * @returns {jQuery|HTMLElement}
+         */
+        modalObject.__getWrapperModalSelector = function () {
 
-            },
+            var wrapperSelectorChildrens = app.modal[modalObject.__name].__wrapperSelector().children();
 
-            __bind: function (listSelector, dataIds, bindings, dataList) {
-
-                var dataIdsLocal = dataIds;
-
-                listSelector.unbind();
-                $.each(bindings, function (functionName, functionCallback) {
-
-                    listSelector.on('click', '[event="' + functionName + '"]', function (e) {
-
-                        var arrtributeDataId = $(e.currentTarget).attr('dataId');
-
-                        $.each(dataIdsLocal, function (i, dataId) {
-
-                            if (dataId.__dataId == arrtributeDataId) {
-                                e.eCtx = dataId.__context;
-
-                                var selector = $('*[dataId="' + dataId.dataId + '"]');
-                                selector.dataId = dataId.__dataId;
-                                e.eCtxSelector = function () {
-                                    return selector;
-                                }
-                            }
-
-                        });
-
-                        e.eCtxList = dataList;
-
-                        functionCallback(e);
-
-                    });
-
-                });
-
-                this.__dataIds = dataIdsLocal;
-
-
+            if (wrapperSelectorChildrens.length == 1) {
+                return wrapperSelectorChildrens;
+            } else if (wrapperSelectorChildrens.length > 1) {
+                app.system.__throwError('Modal {0} view can only have one parent DOM element, found {1}', [modalObject.__name, wrapperSelectorChildrens.length]);
+            } else if (wrapperSelectorChildrens.length == 0) {
+                app.system.__throwError('Modal {0} view must have one parent DOM element', [modalObject.__name]);
             }
 
         }
 
-        app.lister[listerName] = __listerObject;
+        /**
+         * @public
+         *
+         * Sets @private modalObject.__hidden to false
+         * Invokes @private modal.__onModalShowEvent for default or custom implementation of modal showing mechanics
+         *
+         */
+        modalObject.show = function () {
+
+            app.modal[modalObject.__name].__hidden = false;
+            app.modal.__onModalShowEvent(app.mCtx[modalObject.__name].__selfSelector(), app.mCtx[modalObject.__name], app.modal.__onModalShowEventDefault);
+        };
+
+        /**
+         * @public
+         *
+         * Sets @private modalObject.__hidden to true
+         * Invokes @private modal.__onModalHideEvent for default or custom implementation of modal hidding mechanics
+         *
+         */
+        modalObject.hide = function () {
+
+            app.modal[modalObject.__name].__hidden = true;
+            app.modal.__onModalHideEvent(app.mCtx[modalObject.__name].__selfSelector(), app.mCtx[modalObject.__name], app.modal.__onModalHideEventDefault);
+        };
+
+        modalObject.__createModalViewPath(modalObject);
+
+        //Creating copy of modal object in @private __dataArchive and in modal[modalName] variable
+        app.modal.__dataArchive[modalObject.__name] = $.extend(true, {}, modalObject);
+        app.modal[modalObject.__name] = $.extend(true, {}, modalObject);
+
+
+    },
+
+    /**
+     * @private
+     *
+     * Returns modal's DOM element with @attr modals attribute
+     *
+     * @returns {jQuery|HTMLElement}
+     */
+    __getView: function () {
+        return $('[' + app.__attributes.MODALS + ']');
+    },
+
+    /**
+     * @private
+     *
+     * Verify if DOM element with @attr modals attribute exists
+     *
+     */
+    __verifyView: function () {
+        if (this.__getView().length == 0) {
+            app.system.__throwError('No DOM element with {0} attribute specified', [app.__attributes.MODALS]);
+        }
+    },
+
+    /**
+     * @private
+     *
+     * Function removes modal wrapper @attr id @private modalObject.__modalWrapperId from @private modal.__modalWrappers
+     * Removes whole wrapper modal DOM element with selector @private modalObject.__wrapperSelector
+     *
+     */
+    __invalidate: function (modalObject) {
+
+        delete app.modal.__modalWrappers[modalObject.__name];
+        modalObject.__wrapperSelector().remove();
+
+    },
+
+    /**
+     * @public
+     *
+     * Function invalidates all rendered modals.
+     * Iterates over @public modal executes @private modal.__invalidate function to remove modals from DOM and cache
+     *
+     */
+    invalidateAll: function () {
+
+        $.each(app.modal, function (modalName, modalObject) {
+
+            if (modalObject instanceof Object && modalObject['__type']) {
+                app.modal.__invalidate(modalObject);
+            }
+
+        });
+
+    },
+
+    /**
+     * @public
+     *
+     * Function hides all rendered modals.
+     * Iterates over @public app.mCtx executes @public modal.hide function to hide modals
+     *
+     */
+    hideAll: function () {
+
+        $.each(app.mCtx, function (modalName, modalObject) {
+            modalObject.hide();
+        });
 
     }
 
@@ -3662,14 +3493,19 @@ app.partial = {
         // Filter if name is invalid (can break application)
         app.system.__filterRestrictedNames(partialName);
 
-
-        if(partialObject.inherits){
+        if (partialObject.inherits) {
             // Apply extending from abstracts
             partialObject = app.abstract.__tryExtend(partialName, partialObject.inherits, partialObject);
         }
 
         app.log('Registering partial {0}', [partialName]);
         app.debug('Invoke partial.register with params: {0} {1}', [partialName, partialObject]);
+
+        if (app.util.System.isNull(partialObject.replace)) {
+            partialObject.replace = false;
+        }
+
+        partialObject.__replace = partialObject.replace;
 
         //Setting tyope of module
         partialObject.__type = 'PARTIAL';
@@ -3693,33 +3529,42 @@ app.partial = {
          * @param partialPassedData
          */
         partialObject.render = function (selector, model) {
-          app.debug('Invoke partialObject.__render');
+            app.debug('Invoke partialObject.__render');
 
-          var __partialObject = $.extend(true, {}, app.partial.__dataArchive[partialObject.__name]);
+            var __partialObject = $.extend(true, {}, app.partial.__dataArchive[partialObject.__name]);
 
-          if (!selector) {
-            app.system.__throwError(app.system.__messages.PARITAL_SELECTOR_NOT_DEFINED, [__partialObject.__name]);
-          }
+            if (!selector) {
+                app.system.__throwError(app.system.__messages.PARITAL_SELECTOR_NOT_DEFINED, [__partialObject.__name]);
+            }
 
-          if(__partialObject.before && app.util.System.isFunction(__partialObject.before)){
-              app.debug('Invokes partial  {0} before() function', [__partialObject.__name]);
-              __partialObject.before();
-          }
+            if (__partialObject.before && app.util.System.isFunction(__partialObject.before)) {
+                app.debug('Invokes partial  {0} before() function', [__partialObject.__name]);
+                __partialObject.before();
+            }
 
-          app.debug('Binding partial {0} template to passed selector {1} ', [__partialObject.__name, selector]);
+            app.debug('Binding partial {0} template to passed selector {1} ', [__partialObject.__name, selector]);
 
-          var renderedTemplate = __partialObject.__template($.extend(true, __partialObject, model));
+            var renderedTemplate = __partialObject.__template($.extend(true, __partialObject, model));
 
-          if(app.config.replaceLangKeys){
-            renderedTemplate = app.message.__replaceTemplateKeys(renderedTemplate);
-          }
+            //Includes static templates
+            templateHtml = app.system.__replacePlainTemplates(templateHtml);
 
-          selector.html(renderedTemplate);
+            if (app.config.replaceLangKeys) {
+                renderedTemplate = app.message.__replaceTemplateKeys(renderedTemplate);
+            }
 
-          app.partial.__bindEvents(selector);
+            if (__partialObject.__replace) {
+                selector = app.partial.__replacePartial(selector, renderedTemplate);
+            } else {
+                selector.html(renderedTemplate);
+            }
 
-          //Translate DOM
-          app.message.__translate();
+
+            //Binds spike events
+            app.system.__bindEvents(selector);
+
+            //Translate DOM
+            app.message.__translate();
 
         };
 
@@ -3773,30 +3618,31 @@ app.partial = {
     /**
      * @private
      *
-     * Finds all elements with attribute @spike-event
-     * in given (root) selector.
+     * Function replaces partial selector with given template
+     * and migrate partial selector @id attribute into
+     * root element of given template
      *
-     * Gets event name and event function string, binds
-     * jQuery event with created function.
+     * @param selector
+     * @param templateHtml
      *
-     * @param rootSelector
      */
-    __bindEvents: function(rootSelector){
+    __replacePartial: function (selector, templateHtml) {
 
-        rootSelector.find('[spike-event]').each(function(i, element){
+        var selectorId = selector.attr('id');
 
-            element = $(element);
+        var rootElementPart = templateHtml.substring(0, templateHtml.indexOf('>'))
+        rootElementPart += ' id="' + selectorId + '" ';
 
-            var eventName = element.attr('spike-event');
-            element.removeAttr('spike-event');
+        templateHtml = rootElementPart + templateHtml.substring(templateHtml.indexOf('>'), templateHtml.length);
 
-            var eventFunctionBody = element.attr('spike-event-'+eventName);
+        selector.replaceWith(templateHtml);
 
-            element.on(eventName, Function(eventFunctionBody));
+        app.system.__clearSelectorInCache(selectorId);
 
-        });
+        return $('#'+selectorId);
 
     }
+
 
 };/**
  * @public
@@ -4410,6 +4256,28 @@ app.util = {
         /**
          * @public
          *
+         * Checks if given variable is an object
+         * If null or undefined returns false
+         *
+         * @param object
+         */
+        isObject: function(object){
+
+            if(app.util.System.isNull(object)){
+                return false;
+            }
+
+            if(object.toString() == '[object Object]'){
+                return true;
+            }
+
+            return false;
+
+        },
+
+        /**
+         * @public
+         *
          * Function to parse JSON @string to JavaScript @object with replacing
          * whole whitespaces, tabs, new lines etc.
          *
@@ -4603,6 +4471,7 @@ app.util = {
             return arr2;
 
         },
+
 
         /**
          * @public
@@ -6431,6 +6300,65 @@ jQuery.fn.extend({
  * @param value
  * @param filter --optional
  */
+
+function _spike_jquery_set_setFunction(selector, value) {
+
+    var elementType = selector.prop('tagName');
+
+    if (!elementType) {
+        elementType = selector.prop('nodeName');
+    }
+
+    elementType = elementType.toLowerCase();
+
+    if (elementType == 'label' || elementType == 'div' || elementType == 'span' || elementType == 'button' || elementType == 'p' || elementType.indexOf('h') > -1) {
+        selector.html(value.toString());
+    } else if (elementType == 'img') {
+        selector.attr('src', value);
+    } else if (selector.is(':checkbox')) {
+        if (value == true || parseInt(value) == 1) {
+            selector.prop('checked', true);
+        } else {
+            selector.prop('checked', false);
+        }
+    } else if (elementType == 'a') {
+        selector.attr('href', value);
+    } else {
+        selector.val(value);
+    }
+
+};
+
+function _spike_jquery_set_populateFunction(selector, data, prefix, selectors) {
+
+    if (!prefix) {
+        prefix = '';
+    }
+
+    if (!selectors) {
+        selectors = Array.prototype.slice.call(selector[0].querySelectorAll('[id]')).concat(Array.prototype.slice.call(selector[0].querySelectorAll('['+app.__attributes.SET_VAL+']')));
+    }
+
+    Object.keys(data).map(function (itemName) {
+
+        var reducedSelectors = [];
+        for (var i = 0; i < selectors.length; i++) {
+
+            if (selectors[i].id == prefix + itemName || $(selectors[i]).attr(app.__attributes.SET_VAL) == prefix + itemName) {
+                $(selectors[i]).set(data[itemName]);
+            } else {
+                reducedSelectors.push(selectors[i]);
+            }
+        }
+
+        if (app.util.System.isObject(data[itemName])) {
+            _spike_jquery_set_populateFunction(selector, data[itemName], itemName + '.', reducedSelectors);
+        }
+
+    });
+
+};
+
 jQuery.fn.extend({
 
     set: function (_value, _filter) {
@@ -6443,35 +6371,12 @@ jQuery.fn.extend({
             _value = _filter(_value);
         }
 
-        var setFunction = function (selector, value) {
-
-            var elementType = selector.prop('tagName');
-
-            if (!elementType) {
-                elementType = selector.prop('nodeName');
-            }
-
-            elementType = elementType.toLowerCase();
-
-            if (elementType == 'label' || elementType == 'div' || elementType == 'span' || elementType == 'button' || elementType == 'p' || elementType.indexOf('h') > -1) {
-                selector.html(value.toString());
-            } else if (elementType == 'img') {
-                selector.attr('src', value);
-            } else if (selector.is(':checkbox')) {
-                if (value == true || parseInt(value) == 1) {
-                    selector.prop('checked', true);
-                } else {
-                    selector.prop('checked', false);
-                }
-            } else if (elementType == 'a') {
-                selector.attr('href', value);
-            } else {
-                selector.val(value);
-            }
-
+        if (app.util.System.isObject(_value)) {
+            _spike_jquery_set_populateFunction($(this), _value);
+        } else {
+            _spike_jquery_set_setFunction($(this), _value);
         }
 
-        setFunction($(this), _value);
 
     },
 
