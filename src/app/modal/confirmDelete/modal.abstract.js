@@ -2,26 +2,32 @@
 
 app.abstract.register("Modal", {
 
-    bindCancel: function(){
+    /**
+     * some import
+     */
+    bindCancel: function () {
 
-        $super.selector.close().click(function(e){
+        $super.selector.close().click(function (e) {
             e.preventDefault();
             $super.hide();
         });
 
     },
 
-    bindOk: function(params){
+    realizeOk: function (e) {
+        e.preventDefault();
+        $super.hide();
+        params.approveCallback();
+    },
 
-        if(params.approveCallback){
+    /**
+     * method
+     * @param params
+     */
+    bindOk: function (params) {
 
-            $super.selector.ok().click(function(e){
-                e.preventDefault();
-                $super.hide();
-                params.approveCallback();
-            });
-
-
+        if (params.approveCallback) {
+            $super.selector.ok().click($super.realizeOk.bind($super));
         }
 
     }
