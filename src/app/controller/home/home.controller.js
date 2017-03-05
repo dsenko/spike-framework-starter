@@ -9,7 +9,7 @@ app.controller.register("Home", {
     },
 
     init: function (params) {
-        console.log(params);
+        app.debug('params',params);
     }
 
 });

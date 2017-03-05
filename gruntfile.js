@@ -71,7 +71,7 @@ module.exports = function (grunt) {
     grunt.initConfig({
 
         clean: {
-            postBuild: [
+            postProd: [
                 './dist/css/style.css',
                 './dist/css/style.css.map',
                 './dist/css/style.scss',
@@ -317,7 +317,7 @@ module.exports = function (grunt) {
     grunt.registerTask('prod', [
         'build',
         'preprocess:prod',
-        'clean:postBuild'
+        'clean:postProd'
     ]);
 
 

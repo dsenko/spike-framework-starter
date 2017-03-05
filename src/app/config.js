@@ -3,6 +3,8 @@
  */
 app.config.extend({
 
+    enableSecurity: true,
+
     apiUrl: 'https://jsonplaceholder.typicode.com',
 
     debug: true,
