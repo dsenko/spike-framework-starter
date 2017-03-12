@@ -9,6 +9,10 @@ app.component.register("CommentsList", {
 
     init: function (data) {
         $this.createCommentsList(data.pathParams.postId);
+
+        app.log('component rootSelector');
+        console.log($this.rootSelector());
+
     },
 
 

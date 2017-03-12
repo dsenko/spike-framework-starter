@@ -9,6 +9,9 @@ app.controller.register("EditPost", {
 
     init: function (data) {
 
+        app.log('controller rootSelector');
+        console.log($this.rootSelector());
+
         $this.selector.backToPost().click(app.router.back);
 
         $postService.getPost(data.pathParams.postId)

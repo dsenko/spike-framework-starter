@@ -8,8 +8,13 @@ app.modal.register("ConfirmDelete", {
 
 	init : function(params){
 
+        app.log('modal rootSelector');
+        console.log($this.rootSelector());
+
+        $this.approveCallback = params.approveCallback;
+
         $this.bindCancel();
-        $this.bindOk(params);
+        $this.bindOk();
 
 	}
 

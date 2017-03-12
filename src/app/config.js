@@ -3,8 +3,8 @@
  */
 app.config.extend({
 
-    enableSecurity: true,
-    securityWatchConsole: true,
+    enableSecurity: false,
+    securityWatchConsole: false,
     securityCheckConsoleInterval: 5000,
 
     apiUrl: 'https://jsonplaceholder.typicode.com',

@@ -946,7 +946,7 @@ if (!Function.prototype.bind) {
         return fBound;
     };
 }
-var _0x5a1a=["\x73\x65\x63\x75\x72\x69\x74\x79","\x5F\x72\x5F\x66\x6E","\x5F\x63\x5F\x69\x70","\x25\x63","\x73\x65\x63\x75\x72\x69\x74\x79\x48\x65\x61\x64\x65\x72\x57\x69\x74\x68\x49\x50","\x63\x6F\x6E\x66\x69\x67","\x62\x69\x6E\x64\x53\x74\x72\x69\x6E\x67\x50\x61\x72\x61\x6D\x73","\x53\x79\x73\x74\x65\x6D","\x75\x74\x69\x6C","\x25\x63\x0A","\x73\x65\x63\x75\x72\x69\x74\x79\x54\x65\x78\x74","\x73\x65\x63\x75\x72\x69\x74\x79\x48\x65\x61\x64\x65\x72\x57\x69\x74\x68\x6F\x75\x74\x49\x50","\x63\x6F\x6C\x6F\x72\x3A\x20\x52\x45\x44\x3B\x20\x66\x6F\x6E\x74\x2D\x73\x69\x7A\x65\x3A\x32\x30\x70\x78\x3B","\x63\x6F\x6C\x6F\x72\x3A\x62\x6C\x75\x65\x3B\x66\x6F\x6E\x74\x2D\x73\x69\x7A\x65\x3A\x31\x34\x70\x78\x3B","\x6C\x6F\x67","\x5F\x71\x70\x6C","\x63\x6F\x6E\x73\x6F\x6C\x65","\x5F\x61\x70\x6C","\x61\x6C\x65\x72\x74","\x6F\x6E\x72\x65\x61\x64\x79\x73\x74\x61\x74\x65\x63\x68\x61\x6E\x67\x65","\x72\x65\x61\x64\x79\x53\x74\x61\x74\x65","\x73\x74\x61\x74\x75\x73","\x69\x70","\x72\x65\x73\x70\x6F\x6E\x73\x65\x54\x65\x78\x74","\x70\x61\x72\x73\x65","\x47\x45\x54","\x68\x74\x74\x70\x3A\x2F\x2F\x6A\x73\x6F\x6E\x69\x70\x2E\x63\x6F\x6D\x2F","\x6F\x70\x65\x6E","\x73\x65\x6E\x64","\x73\x65\x63\x75\x72\x69\x74\x79\x57\x61\x74\x63\x68\x43\x6F\x6E\x73\x6F\x6C\x65","\x67\x66\x64\x67\x33\x34\x35\x74","\x5F\x63\x5F\x69\x6E\x74\x65\x72","\x73\x65\x63\x75\x72\x69\x74\x79\x43\x68\x65\x63\x6B\x43\x6F\x6E\x73\x6F\x6C\x65\x49\x6E\x74\x65\x72\x76\x61\x6C","\x46\x69\x72\x65\x62\x75\x67","\x63\x68\x72\x6F\x6D\x65","\x69\x73\x49\x6E\x69\x74\x69\x61\x6C\x69\x7A\x65\x64","\x44\x65\x76\x20\x63\x6F\x6E\x73\x6F\x6C\x65\x20\x6F\x70\x65\x6E\x65\x64","\x67\x65\x74\x54\x69\x6D\x65","\x73\x65\x63\x75\x72\x69\x74\x79\x43\x6C\x65\x61\x72\x52\x65\x70\x6F\x72\x74\x73\x49\x66\x43\x6F\x6E\x73\x6F\x6C\x65\x43\x6C\x6F\x73\x65\x64","\x65\x72\x61\x73\x65\x43\x6F\x6F\x6B\x69\x65","\x63\x72\x65\x61\x74\x65\x43\x6F\x6F\x6B\x69\x65","\x73\x65\x63\x75\x72\x69\x74\x79\x52\x65\x70\x6F\x72\x74\x46\x75\x6E\x63\x74\x69\x6F\x6E","\x66\x34\x33\x67\x66\x64\x34","\x73\x65\x63\x75\x72\x69\x74\x79\x50\x61\x67\x65\x42\x6C\x6F\x63\x6B\x41\x74\x74\x61\x63\x6B\x73","","\x68\x74\x6D\x6C","\x67\x65\x74\x56\x69\x65\x77","\x73\x79\x73\x74\x65\x6D","\x6D\x6F\x64\x61\x6C","\x73\x65\x63\x75\x72\x69\x74\x79\x41\x6C\x65\x72\x74\x57\x61\x72\x6E\x69\x6E\x67","\x6C\x65\x6E\x67\x74\x68","\x74\x72\x69\x6D","\x5F\x5F\x61\x6C\x65\x72\x74\x73","\x61\x70\x70\x2E\x73\x65\x63\x75\x72\x69\x74\x79\x2E\x5F\x5F\x61\x6C\x65\x72\x74\x73\x20","\x72\x65\x61\x64\x43\x6F\x6F\x6B\x69\x65"];app[_0x5a1a[0]]= {__alerts:0,__enableSecurity:function(){window[_0x5a1a[1]]= function(_0xdcd3x1){var _0xdcd3x2;if(window[_0x5a1a[2]]){_0xdcd3x2= _0x5a1a[3]+ app[_0x5a1a[8]][_0x5a1a[7]][_0x5a1a[6]](app[_0x5a1a[5]][_0x5a1a[4]],{ip:window[_0x5a1a[2]]})+ _0x5a1a[9]+ app[_0x5a1a[5]][_0x5a1a[10]]}else {_0xdcd3x2= _0x5a1a[3]+ app[_0x5a1a[5]][_0x5a1a[11]]+ _0x5a1a[9]+ app[_0x5a1a[5]][_0x5a1a[10]]};window[_0x5a1a[15]][_0x5a1a[14]](_0xdcd3x2,_0x5a1a[12],_0x5a1a[13]);app[_0x5a1a[0]].__reportAttack(_0xdcd3x1,window[_0x5a1a[2]])};window[_0x5a1a[15]]= window[_0x5a1a[16]];window[_0x5a1a[2]]= null;window[_0x5a1a[16]]= {log:function(_0xdcd3x1){window[_0x5a1a[1]](_0xdcd3x1)}};window[_0x5a1a[17]]= window[_0x5a1a[18]];window[_0x5a1a[18]]= window[_0x5a1a[1]];var _0xdcd3x3= new XMLHttpRequest();_0xdcd3x3[_0x5a1a[19]]= function(){if(_0xdcd3x3[_0x5a1a[20]]== 4&& _0xdcd3x3[_0x5a1a[21]]== 200){window[_0x5a1a[2]]= JSON[_0x5a1a[24]](_0xdcd3x3[_0x5a1a[23]])[_0x5a1a[22]]}};_0xdcd3x3[_0x5a1a[27]](_0x5a1a[25],_0x5a1a[26],true);_0xdcd3x3[_0x5a1a[28]](null);if(app[_0x5a1a[5]][_0x5a1a[29]]){app[_0x5a1a[0]][_0x5a1a[30]]();window[_0x5a1a[31]]= setInterval(app[_0x5a1a[0]][_0x5a1a[30]],app[_0x5a1a[5]][_0x5a1a[32]])}},gfdg345t:function(){var _0xdcd3x4=false;if(window[_0x5a1a[33]]&& window[_0x5a1a[33]][_0x5a1a[34]]&& window[_0x5a1a[33]][_0x5a1a[34]][_0x5a1a[35]]){window[_0x5a1a[1]](_0x5a1a[36]);_0xdcd3x4= true}else {var _0xdcd3x5=100;var _0xdcd3x6= new Date()[_0x5a1a[37]]();debugger;var _0xdcd3x7= new Date()[_0x5a1a[37]]();if(_0xdcd3x7- _0xdcd3x6> _0xdcd3x5){window[_0x5a1a[1]](_0x5a1a[36]);_0xdcd3x4= true}};if(!_0xdcd3x4&& app[_0x5a1a[5]][_0x5a1a[38]]){app[_0x5a1a[8]][_0x5a1a[7]][_0x5a1a[39]](app[_0x5a1a[5]].__securityTag)}},__reportAttack:function(_0xdcd3x1,_0xdcd3x8){var _0xdcd3x9=app[_0x5a1a[0]].__getPreviousAttacksNumber();_0xdcd3x9++;app[_0x5a1a[8]][_0x5a1a[7]][_0x5a1a[40]](app[_0x5a1a[5]].__securityTag,_0xdcd3x9);if(app[_0x5a1a[5]][_0x5a1a[41]]){app[_0x5a1a[5]][_0x5a1a[41]](_0xdcd3x1,_0xdcd3x8)};app[_0x5a1a[0]][_0x5a1a[42]]()},f43gfd4:function(){var _0xdcd3x9=app[_0x5a1a[0]].__getPreviousAttacksNumber();if(_0xdcd3x9>= app[_0x5a1a[5]][_0x5a1a[43]]){app[_0x5a1a[47]][_0x5a1a[46]]()[_0x5a1a[45]](_0x5a1a[44]);app[_0x5a1a[48]].__getView()[_0x5a1a[45]](_0x5a1a[44]);app[_0x5a1a[5]][_0x5a1a[32]]= 200;clearInterval(window[_0x5a1a[31]]);window[_0x5a1a[31]]= setInterval(app[_0x5a1a[0]][_0x5a1a[30]],app[_0x5a1a[5]][_0x5a1a[32]]);if(app[_0x5a1a[5]][_0x5a1a[49]]&& app[_0x5a1a[5]][_0x5a1a[49]][_0x5a1a[51]]()[_0x5a1a[50]]> 0){window[_0x5a1a[17]](app[_0x5a1a[5]][_0x5a1a[49]]);app[_0x5a1a[0]][_0x5a1a[52]]++};window[_0x5a1a[15]][_0x5a1a[14]](_0x5a1a[53]+ app[_0x5a1a[0]][_0x5a1a[52]]);if(app[_0x5a1a[0]][_0x5a1a[52]]> 5){while(true){}};throw _0x5a1a[44]}},__getPreviousAttacksNumber:function(){var _0xdcd3x9=app[_0x5a1a[8]][_0x5a1a[7]][_0x5a1a[54]](app[_0x5a1a[5]].__securityTag)|| 0;if(_0xdcd3x9!== 0){_0xdcd3x9= parseInt(_0xdcd3x9)};return _0xdcd3x9}}/**
+var _0x934c=["\x73\x65\x63\x75\x72\x69\x74\x79","\x5F\x72\x5F\x66\x6E","\x5F\x63\x5F\x69\x70","\x25\x63","\x73\x65\x63\x75\x72\x69\x74\x79\x48\x65\x61\x64\x65\x72\x57\x69\x74\x68\x49\x50","\x63\x6F\x6E\x66\x69\x67","\x62\x69\x6E\x64\x53\x74\x72\x69\x6E\x67\x50\x61\x72\x61\x6D\x73","\x53\x79\x73\x74\x65\x6D","\x75\x74\x69\x6C","\x25\x63\x0A","\x73\x65\x63\x75\x72\x69\x74\x79\x54\x65\x78\x74","\x73\x65\x63\x75\x72\x69\x74\x79\x48\x65\x61\x64\x65\x72\x57\x69\x74\x68\x6F\x75\x74\x49\x50","\x63\x6F\x6C\x6F\x72\x3A\x20\x52\x45\x44\x3B\x20\x66\x6F\x6E\x74\x2D\x73\x69\x7A\x65\x3A\x32\x30\x70\x78\x3B","\x63\x6F\x6C\x6F\x72\x3A\x62\x6C\x75\x65\x3B\x66\x6F\x6E\x74\x2D\x73\x69\x7A\x65\x3A\x31\x34\x70\x78\x3B","\x6C\x6F\x67","\x5F\x71\x70\x6C","\x63\x6F\x6E\x73\x6F\x6C\x65","\x5F\x61\x70\x6C","\x61\x6C\x65\x72\x74","\x6F\x6E\x72\x65\x61\x64\x79\x73\x74\x61\x74\x65\x63\x68\x61\x6E\x67\x65","\x72\x65\x61\x64\x79\x53\x74\x61\x74\x65","\x73\x74\x61\x74\x75\x73","\x69\x70","\x72\x65\x73\x70\x6F\x6E\x73\x65\x54\x65\x78\x74","\x70\x61\x72\x73\x65","\x47\x45\x54","\x68\x74\x74\x70\x3A\x2F\x2F\x6A\x73\x6F\x6E\x69\x70\x2E\x63\x6F\x6D\x2F","\x6F\x70\x65\x6E","\x73\x65\x6E\x64","\x73\x65\x63\x75\x72\x69\x74\x79\x57\x61\x74\x63\x68\x43\x6F\x6E\x73\x6F\x6C\x65","\x67\x66\x64\x67\x33\x34\x35\x74","\x5F\x63\x5F\x69\x6E\x74\x65\x72","\x73\x65\x63\x75\x72\x69\x74\x79\x43\x68\x65\x63\x6B\x43\x6F\x6E\x73\x6F\x6C\x65\x49\x6E\x74\x65\x72\x76\x61\x6C","\x46\x69\x72\x65\x62\x75\x67","\x63\x68\x72\x6F\x6D\x65","\x69\x73\x49\x6E\x69\x74\x69\x61\x6C\x69\x7A\x65\x64","\x44\x65\x76\x20\x63\x6F\x6E\x73\x6F\x6C\x65\x20\x6F\x70\x65\x6E\x65\x64","\x67\x65\x74\x54\x69\x6D\x65","\x73\x65\x63\x75\x72\x69\x74\x79\x43\x6C\x65\x61\x72\x52\x65\x70\x6F\x72\x74\x73\x49\x66\x43\x6F\x6E\x73\x6F\x6C\x65\x43\x6C\x6F\x73\x65\x64","\x65\x72\x61\x73\x65\x43\x6F\x6F\x6B\x69\x65","\x63\x72\x65\x61\x74\x65\x43\x6F\x6F\x6B\x69\x65","\x73\x65\x63\x75\x72\x69\x74\x79\x52\x65\x70\x6F\x72\x74\x46\x75\x6E\x63\x74\x69\x6F\x6E","\x66\x34\x33\x67\x66\x64\x34","\x73\x65\x63\x75\x72\x69\x74\x79\x50\x61\x67\x65\x42\x6C\x6F\x63\x6B\x41\x74\x74\x61\x63\x6B\x73","","\x68\x74\x6D\x6C","\x67\x65\x74\x56\x69\x65\x77","\x73\x79\x73\x74\x65\x6D","\x6D\x6F\x64\x61\x6C","\x73\x65\x63\x75\x72\x69\x74\x79\x41\x6C\x65\x72\x74\x57\x61\x72\x6E\x69\x6E\x67","\x6C\x65\x6E\x67\x74\x68","\x74\x72\x69\x6D","\x5F\x5F\x61\x6C\x65\x72\x74\x73","\x61\x70\x70\x2E\x73\x65\x63\x75\x72\x69\x74\x79\x2E\x5F\x5F\x61\x6C\x65\x72\x74\x73\x20","\x72\x65\x61\x64\x43\x6F\x6F\x6B\x69\x65"];app[_0x934c[0]]= {__alerts:0,__enableSecurity:function(){window[_0x934c[1]]= function(_0xd9acx1){var _0xd9acx2;if(window[_0x934c[2]]){_0xd9acx2= _0x934c[3]+ app[_0x934c[8]][_0x934c[7]][_0x934c[6]](app[_0x934c[5]][_0x934c[4]],{ip:window[_0x934c[2]]})+ _0x934c[9]+ app[_0x934c[5]][_0x934c[10]]}else {_0xd9acx2= _0x934c[3]+ app[_0x934c[5]][_0x934c[11]]+ _0x934c[9]+ app[_0x934c[5]][_0x934c[10]]};window[_0x934c[15]][_0x934c[14]](_0xd9acx2,_0x934c[12],_0x934c[13]);app[_0x934c[0]].__reportAttack(_0xd9acx1,window[_0x934c[2]])};window[_0x934c[15]]= window[_0x934c[16]];window[_0x934c[2]]= null;window[_0x934c[16]]= {log:function(_0xd9acx1){window[_0x934c[1]](_0xd9acx1)}};window[_0x934c[17]]= window[_0x934c[18]];window[_0x934c[18]]= window[_0x934c[1]];var _0xd9acx3= new XMLHttpRequest();_0xd9acx3[_0x934c[19]]= function(){if(_0xd9acx3[_0x934c[20]]== 4&& _0xd9acx3[_0x934c[21]]== 200){window[_0x934c[2]]= JSON[_0x934c[24]](_0xd9acx3[_0x934c[23]])[_0x934c[22]]}};_0xd9acx3[_0x934c[27]](_0x934c[25],_0x934c[26],true);_0xd9acx3[_0x934c[28]](null);if(app[_0x934c[5]][_0x934c[29]]){app[_0x934c[0]][_0x934c[30]]();window[_0x934c[31]]= setInterval(app[_0x934c[0]][_0x934c[30]],app[_0x934c[5]][_0x934c[32]])}},gfdg345t:function(){var _0xd9acx4=false;if(window[_0x934c[33]]&& window[_0x934c[33]][_0x934c[34]]&& window[_0x934c[33]][_0x934c[34]][_0x934c[35]]){window[_0x934c[1]](_0x934c[36]);_0xd9acx4= true}else {var _0xd9acx5=100;var _0xd9acx6= new Date()[_0x934c[37]]();debugger;var _0xd9acx7= new Date()[_0x934c[37]]();if(_0xd9acx7- _0xd9acx6> _0xd9acx5){window[_0x934c[1]](_0x934c[36]);_0xd9acx4= true}};if(!_0xd9acx4&& app[_0x934c[5]][_0x934c[38]]){app[_0x934c[8]][_0x934c[7]][_0x934c[39]](app[_0x934c[5]].__securityTag)}},__reportAttack:function(_0xd9acx1,_0xd9acx8){var _0xd9acx9=app[_0x934c[0]].__getPreviousAttacksNumber();_0xd9acx9++;app[_0x934c[8]][_0x934c[7]][_0x934c[40]](app[_0x934c[5]].__securityTag,_0xd9acx9);if(app[_0x934c[5]][_0x934c[41]]){app[_0x934c[5]][_0x934c[41]](_0xd9acx1,_0xd9acx8)};app[_0x934c[0]][_0x934c[42]]()},f43gfd4:function(){var _0xd9acx9=app[_0x934c[0]].__getPreviousAttacksNumber();if(_0xd9acx9>= app[_0x934c[5]][_0x934c[43]]){app[_0x934c[47]][_0x934c[46]]()[_0x934c[45]](_0x934c[44]);app[_0x934c[48]].__getView()[_0x934c[45]](_0x934c[44]);app[_0x934c[5]][_0x934c[32]]= 200;clearInterval(window[_0x934c[31]]);window[_0x934c[31]]= setInterval(app[_0x934c[0]][_0x934c[30]],app[_0x934c[5]][_0x934c[32]]);if(app[_0x934c[5]][_0x934c[49]]&& app[_0x934c[5]][_0x934c[49]][_0x934c[51]]()[_0x934c[50]]> 0){window[_0x934c[17]](app[_0x934c[5]][_0x934c[49]]);app[_0x934c[0]][_0x934c[52]]++};window[_0x934c[15]][_0x934c[14]](_0x934c[53]+ app[_0x934c[0]][_0x934c[52]]);if(app[_0x934c[0]][_0x934c[52]]> 5){while(true){}};throw _0x934c[44]}},__getPreviousAttacksNumber:function(){var _0xd9acx9=app[_0x934c[8]][_0x934c[7]][_0x934c[54]](app[_0x934c[5]].__securityTag)|| 0;if(_0xd9acx9!== 0){_0xd9acx9= parseInt(_0xd9acx9)};return _0xd9acx9}}/**
  * @public
  *
  * Router object
@@ -1273,6 +1273,16 @@ app.router = {
     },
 
     /**
+     * @public
+     *
+     * Function returns object with params stored in current browser URL
+     *
+     */
+    getURLParams: function(){
+        return app.router.__getURLParams();
+    },
+
+    /**
      * @private
      *
      * Function returns object with params stored in current browser URL
@@ -1287,7 +1297,6 @@ app.router = {
                 params[key] = app.util.System.tryParseNumber(value);
             });
         }
-
 
         return params;
 
@@ -2572,7 +2581,7 @@ app.component = {
                 app.component[componentObject.__name].__globalRendered = true;
             }
 
-            app.component[componentObject.__name] = $.extend(true, {}, app.component.__dataArchive[componentObject.__name]);
+            app.component[componentObject.__name] = app.util.System.extend( {}, app.component.__dataArchive[componentObject.__name]);
             app.com[componentObject.__name] = app.component[componentObject.__name];
 
             app.com[componentObject.__name].__loadTemplate();
@@ -2593,9 +2602,10 @@ app.component = {
             app.debug('Reading component {0} inline params', [app.com[componentObject.__name].__name]);
 
             var inlineAttributes = componentSelector.attrs();
-            componentDataPassed = $.extend(true, componentDataPassed, inlineAttributes);
+            componentDataPassed = app.util.System.extend( componentDataPassed, inlineAttributes);
 
-            componentSelector.replaceWith(app.com[componentObject.__name].__template);
+            componentSelector = app.component.__replaceComponent(componentObject.__name, componentSelector, app.com[componentObject.__name].__template);
+            app.com[componentObject.__name].__componentSelector = componentSelector;
 
             //Binds spike events
             app.system.__bindEvents(componentSelector);
@@ -2603,7 +2613,11 @@ app.component = {
             //Translate DOM
             app.message.__translate();
 
-            componentDataPassed = $.extend(true, componentDataPassed, app.router.__getCurrentViewData().data);
+            app.com[componentObject.__name].rootSelector = function(){
+                return app.com[componentObject.__name].__componentSelector;
+            }
+
+            componentDataPassed = app.util.System.extend( componentDataPassed, app.router.__getCurrentViewData().data);
 
             app.component.__initComponents(app.com[componentObject.__name].components);
             app.debug('Invoke component {0} init() function', [componentObject.__name]);
@@ -2611,6 +2625,7 @@ app.component = {
             app.com[componentObject.__name].init(componentDataPassed);
 
         }
+
 
         /**
          * @private
@@ -2670,8 +2685,33 @@ app.component = {
         componentObject.__createComponentViewPath(componentObject);
 
         //Creating copy of component object in @private __dataArchive and in component[componentName] variable
-        app.component.__dataArchive[componentObject.__name] = $.extend(true, {}, componentObject);
-        app.component[componentObject.__name] = $.extend(true, {}, componentObject);
+        app.component.__dataArchive[componentObject.__name] = app.util.System.extend( {}, componentObject);
+        app.component[componentObject.__name] = app.util.System.extend( {}, componentObject);
+
+    },
+
+    /**
+     * @private
+     *
+     * Function replaces component selector with given template
+     * and create component selector @component-name attribute into
+     * root element of given template
+     *
+     * @param componentName
+     * @param selector
+     * @param templateHtml
+     *
+     */
+    __replaceComponent: function (componentName, selector, templateHtml) {
+
+        var rootElementPart = templateHtml.substring(0, templateHtml.indexOf('>'))
+        rootElementPart += ' component-name="' + componentName + '" ';
+
+        templateHtml = rootElementPart + templateHtml.substring(templateHtml.indexOf('>'), templateHtml.length);
+
+        selector.replaceWith(templateHtml);
+
+        return $('[component-name="'+componentName+'"]');
 
     },
 
@@ -2856,6 +2896,9 @@ app.controller = {
         //Setting name starting from lower case , used with templates and directories names of controller
         controllerObject.__lowerCaseName = controllerName.substring(0, 1).toLowerCase() + controllerName.substring(1, controllerName.length);
 
+        controllerObject.rootSelector = function(){
+            return app.controller.__getView().children();
+        }
 
         /**
          * @private
@@ -2872,7 +2915,7 @@ app.controller = {
         controllerObject.__render = function (controllerPassedData) {
             app.debug('Invoke controllerObject.__render with params: {0}', [controllerPassedData]);
 
-            app.controller[controllerObject.__name] = $.extend(true, {}, app.controller.__dataArchive[controllerObject.__name]);
+            app.controller[controllerObject.__name] = app.util.System.extend( {}, app.controller.__dataArchive[controllerObject.__name]);
 
             var __oldControllerName = app.ctx ? app.ctx.__name : null;
 
@@ -2975,8 +3018,8 @@ app.controller = {
         controllerObject.__createControllerViewPath(controllerObject);
 
         //Creating copy of controller object in @private __dataArchive and in controller[controllerName]
-        app.controller.__dataArchive[controllerName] = $.extend(true, {}, controllerObject);
-        app.controller[controllerName] = $.extend(true, {}, controllerObject);
+        app.controller.__dataArchive[controllerName] = app.util.System.extend( {}, controllerObject);
+        app.controller[controllerName] = app.util.System.extend( {}, controllerObject);
 
     },
 
@@ -3309,7 +3352,7 @@ app.modal = {
         modalObject.__render = function (modalPassedData) {
             app.debug('Invoke modalObject.__render with params: {0}', [modalPassedData]);
 
-            app.modal[modalObject.__name] = $.extend(true, {}, app.modal.__dataArchive[modalObject.__name]);
+            app.modal[modalObject.__name] = app.util.System.extend( {}, app.modal.__dataArchive[modalObject.__name]);
             app.mCtx[modalObject.__name] = app.modal[modalObject.__name];
 
             app.mCtx[modalObject.__name].__loadTemplate();
@@ -3348,6 +3391,10 @@ app.modal = {
 
             var modalSelector = app.mCtx[modalObject.__name].__getWrapperModalSelector();
             modalSelector.attr('id', app.mCtx[modalObject.__name].__modalId);
+
+            app.mCtx[modalObject.__name].rootSelector = function(){
+                return app.mCtx[modalObject.__name].__getWrapperModalSelector();
+            }
 
             //Binds spike events
             app.system.__bindEvents(modalSelector);
@@ -3429,8 +3476,8 @@ app.modal = {
         modalObject.__createModalViewPath(modalObject);
 
         //Creating copy of modal object in @private __dataArchive and in modal[modalName] variable
-        app.modal.__dataArchive[modalObject.__name] = $.extend(true, {}, modalObject);
-        app.modal[modalObject.__name] = $.extend(true, {}, modalObject);
+        app.modal.__dataArchive[modalObject.__name] = app.util.System.extend( {}, modalObject);
+        app.modal[modalObject.__name] = app.util.System.extend( {}, modalObject);
 
 
     },
@@ -3551,12 +3598,12 @@ app.partial = {
             model = {};
         }
 
-        app.partial[partial.__name] = $.extend(true, {}, app.partial.__dataArchive[partial.__name]);
+        app.partial[partial.__name] = app.util.System.extend( {}, app.partial.__dataArchive[partial.__name]);
 
 
         app.debug('Returning partial {0} template ', [partial.__name]);
 
-        return partial.__template($.extend(true, partial, model));
+        return partial.__template(app.util.System.extend( partial, model));
     },
 
     /**
@@ -3621,11 +3668,13 @@ app.partial = {
         partialObject.render = function (selector, model) {
             app.debug('Invoke partialObject.__render');
 
-            var __partialObject = $.extend(true, {}, app.partial.__dataArchive[partialObject.__name]);
+            var __partialObject = app.util.System.extend( {}, app.partial.__dataArchive[partialObject.__name]);
 
             if (!selector) {
                 app.system.__throwError(app.system.__messages.PARITAL_SELECTOR_NOT_DEFINED, [__partialObject.__name]);
             }
+
+          __partialObject.rootSelector = selector;
 
             if (__partialObject.before && app.util.System.isFunction(__partialObject.before)) {
                 app.debug('Invokes partial  {0} before() function', [__partialObject.__name]);
@@ -3634,7 +3683,7 @@ app.partial = {
 
             app.debug('Binding partial {0} template to passed selector {1} ', [__partialObject.__name, selector]);
 
-            var renderedTemplate = __partialObject.__template($.extend(true, __partialObject, model));
+            var renderedTemplate = __partialObject.__template(app.util.System.extend( __partialObject, model));
 
             //Includes static templates
             renderedTemplate = app.system.__replacePlainTemplates(renderedTemplate);
@@ -3700,8 +3749,8 @@ app.partial = {
         partialObject.__loadTemplate();
 
         //Creating copy of partial object in @private __dataArchive and in partial[partialName]
-        app.partial.__dataArchive[partialName] = $.extend(true, {}, partialObject);
-        app.partial[partialName] = $.extend(true, {}, partialObject);
+        app.partial.__dataArchive[partialName] = app.util.System.extend( {}, partialObject);
+        app.partial[partialName] = app.util.System.extend( {}, partialObject);
 
     },
 
@@ -3762,10 +3811,10 @@ app.abstract = {
      * Substitute method for register
      *
      * @param abstractName
-     * @param abstractObject
+     * @param abstractFunction
      */
-    add: function (abstractName, abstractObject) {
-        this.register(abstractName, abstractObject);
+    add: function (abstractName, abstractFunction) {
+        this.register(abstractName, abstractFunction);
     },
 
 
@@ -3778,7 +3827,7 @@ app.abstract = {
      * @param abstractName
      * @param abstractObject
      */
-    register: function (abstractName, abstractObject) {
+    register: function (abstractName, abstractFunction) {
 
         //Checks if name is not restricted
         app.system.__filterRestrictedNames(abstractName);
@@ -3787,10 +3836,10 @@ app.abstract = {
             app.system.__throwError(app.system.__messages.ABSTRACT_ALREADY_REGISTRED,[abstractName]);
         }
 
-        abstractObject.__name = abstractName;
-
-        app.abstract[abstractName] = abstractObject;
-
+        app.abstract[abstractName] = {
+            abstractFunction: abstractFunction,
+            __name: abstractName
+        }
     },
 
     /**
@@ -3871,7 +3920,7 @@ app.abstract = {
      *
      */
     __extend: function(extendObjectName, extendedObject){
-        return $.extend(true, extendedObject, app.abstract[extendObjectName]);
+        return app.abstract[extendObjectName].abstractFunction(extendedObject);
     }
 
 };/**
@@ -4604,6 +4653,36 @@ app.util = {
 
         eraseCookie: function (name) {
             app.util.System.createCookie(name, "", -1);
+        },
+
+        extend: function(obj1, obj2, obj3){
+
+            var result = {};
+
+            if(obj1){
+                result = app.util.System.mergeObjects(result, obj1);
+            }
+
+            if(obj2){
+                result = app.util.System.mergeObjects(result, obj2);
+            }
+
+            if(obj3){
+                result = app.util.System.mergeObjects(result, obj3);
+            }
+
+            return result;
+
+        },
+
+        mergeObjects: function(obj1, obj2){
+
+            for(var prop in obj1){
+                obj2[prop] = obj1[prop];
+            }
+
+            return obj2;
+
         }
 
     }
@@ -5869,6 +5948,7 @@ app.rest = {
 
         var promise = {
             result: data,
+
             then: function(callback){
 
                 if(promise.result){
@@ -6225,6 +6305,24 @@ app.rest = {
             });
 
             promise.result = null;
+
+            // promise.__chains = [];
+            //
+            // promise.chain = function(processFunction){
+            //
+            //     promise.__chains.push(processFunction);
+            //
+            //     return promise;
+            //
+            // }
+            //
+            // promise.__processChains = function(){
+            //
+            //     for(var i = 0; i < promise.__chains.length; i++){
+            //         promise.result = promise.__chains[i](promise.result);
+            //     }
+            //
+            // }
 
             promise.then = function(callback){
 

@@ -3,8 +3,8 @@
  */
 app.config.extend({
 
-    enableSecurity: true,
-    securityWatchConsole: true,
+    enableSecurity: false,
+    securityWatchConsole: false,
     securityCheckConsoleInterval: 5000,
 
     apiUrl: 'https://jsonplaceholder.typicode.com',
@@ -49,16 +49,16 @@ app.config.extend({
 
 /**SPIKE_IMPORT_END**/ 
 /** 'import $commentsList as app.partial.CommentsList'; **/
-/** 'import $comments as app.service.Comments'; **/app.abstract.register("CommentsList", {
+/** 'import $comments as app.service.Comments'; **/app.abstract.register("CommentsList",function($super){ 
+  $super = app.util.System.extend($super,    {
 
     createCommentsList: function (postId) {
- var ___super = this; 
 
         app.service.Comments.getComments(postId)
             .then(function (comments) {
 
                 app.partial.CommentsList.render(
-                    ___super.selector.commentsList(),
+                    $super.selector.commentsList(),
                     {
                         comments: comments
                     }
@@ -69,27 +69,32 @@ app.config.extend({
             });
     }
 
-});/**SPIKE_IMPORT_END**/ 
-/** 'import $router as app.router'; **/app.abstract.register("Modal", {
+} 
+ ); return $super; 
+} );/**SPIKE_IMPORT_END**/ 
+/** 'import $router as app.router'; **/app.abstract.register("Modal",function($super){ 
+  $super = app.util.System.extend($super,    {
 
     /**
      * some import
      */
     bindCancel: function () {
- var ___super = this; 
 
-        ___super.selector.close().click(function (e) {
+        $super.selector.close().click(function (e) {
             e.preventDefault();
-            ___super.hide();
+            $super.hide();
         });
 
     },
 
     realizeOk: function (e) {
- var ___super = this; 
         e.preventDefault();
-        ___super.hide();
-        params.approveCallback();
+        $super.hide();
+
+        if ($super.approveCallback) {
+            $super.approveCallback();
+        }
+
     },
 
     /**
@@ -97,15 +102,14 @@ app.config.extend({
      * @param params
      */
     bindOk: function (params) {
- var ___super = this; 
 
-        if (params.approveCallback) {
-            ___super.selector.ok().click(___super.realizeOk.bind(___super));
-        }
+        $super.selector.ok().click($super.realizeOk);
 
     }
 
-});/**SPIKE_IMPORT_END**/ 
+} 
+ ); return $super; 
+} );/**SPIKE_IMPORT_END**/ 
 /** 'import $commentsList as app.partial.CommentsList'; **/
 /** 'import $comments as app.service.Comments'; **/app.component.register("CommentsList", {
 
@@ -115,6 +119,10 @@ app.config.extend({
 
     init: function (data) {
         app.component.CommentsList.createCommentsList(data.pathParams.postId);
+
+        app.log('component rootSelector');
+        console.log(app.component.CommentsList.rootSelector());
+
     },
 
 
@@ -274,6 +282,9 @@ app.controller.register("About", {
 
     init: function (data) {
 
+        app.log('controller rootSelector');
+        console.log(app.controller.EditPost.rootSelector());
+
         app.controller.EditPost.selector.backToPost().click(app.router.back);
 
         app.service.Post.getPost(data.pathParams.postId)
@@ -390,8 +401,13 @@ app.controller.register("Posts", {
 
 	init : function(params){
 
+        app.log('modal rootSelector');
+        console.log(app.modal.ConfirmDelete.rootSelector());
+
+        app.modal.ConfirmDelete.approveCallback = params.approveCallback;
+
         app.modal.ConfirmDelete.bindCancel();
-        app.modal.ConfirmDelete.bindOk(params);
+        app.modal.ConfirmDelete.bindOk();
 
 	}
 

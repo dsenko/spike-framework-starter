@@ -17,7 +17,11 @@ app.abstract.register("Modal", {
     realizeOk: function (e) {
         e.preventDefault();
         $super.hide();
-        params.approveCallback();
+
+        if ($super.approveCallback) {
+            $super.approveCallback();
+        }
+
     },
 
     /**
@@ -26,9 +30,7 @@ app.abstract.register("Modal", {
      */
     bindOk: function (params) {
 
-        if (params.approveCallback) {
-            $super.selector.ok().click($super.realizeOk.bind($super));
-        }
+        $super.selector.ok().click($super.realizeOk);
 
     }
 
