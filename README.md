@@ -1,3 +1,6 @@
+
+**PLEASE VISIT WWW.SPIKEFRAMEWORK.COM FOR MORE DETAILS AND DOCS**
+
 **Installation**
 
 Clone _spike-framework-starter-template_ using
