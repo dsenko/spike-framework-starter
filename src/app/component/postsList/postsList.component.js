@@ -18,6 +18,7 @@ app.component.register("PostsList", {
 
         $postService.getRecentPosts()
             .then(function (posts) {
+
                 $this.createPostsList(posts, 5);
             })
             .catch(function (error) {

@@ -12,24 +12,26 @@ app.component.register("TopMenu", {
         });
 
         $this.selector.changeLangToEn().click(function(){
-            $system.changeLanguage('en');
-            $this.setLanguageText();
+            $this.changeLanguage('en');
         });
 
         $this.selector.changeLangToPl().click(function(){
-            $system.changeLanguage('pl');
-            $this.setLanguageText();
+            $this.changeLanguage('pl');
         });
 
         $this.selectCurrent($router.getCurrentRoute());
 
         $router.onRouteChange('topMenu', function(e, currentRoute, currentController){
             $this.selectCurrent(currentRoute);
-            $this.selector.dropdown().slideUp(200);
         });
 
     },
 
+    changeLanguage: function(lang){
+        $system.changeLanguage(lang);
+        $this.setLanguageText();
+        $this.selector.dropdown().slideUp(200);
+    },
 
     selectCurrent: function(currentRoute){
 
@@ -44,6 +46,8 @@ app.component.register("TopMenu", {
         if($this.selector[currentRoute]){
             $this.selector[currentRoute]().addClass('active');
         }
+
+        $this.selector.dropdown().slideUp(200);
 
     },
 

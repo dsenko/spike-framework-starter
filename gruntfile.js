@@ -44,7 +44,7 @@ var application = {
     ],
 
     html: ['./src/app/**/*.html', './src/app/**/*.htm'],
-    sass: ['./src/sass/*.scss', './src/sass/*.css', './src/app/**/*.scss', './src/app/**/*.css'],
+    sass: ['./src/sass/*.scss', './src/sass/*.css', './src/app/**/*.scss', './src/app/**/**/*.scss', './src/app/**/*.css'],
 
 };
 
@@ -324,6 +324,7 @@ module.exports = function (grunt) {
     grunt.registerTask('dev', [
         'build',
         'preprocess:dev',
+        'cachebreaker:dev',
         'concurrent:live'
     ]);
 

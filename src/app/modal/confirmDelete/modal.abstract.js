@@ -7,19 +7,21 @@ app.abstract.register("Modal", {
      */
     bindCancel: function () {
 
-        $super.selector.close().click(function (e) {
+        var self = this;
+
+        self.selector.close().click(function (e) {
             e.preventDefault();
-            $super.hide();
+            self.hide();
         });
 
     },
 
     realizeOk: function (e) {
         e.preventDefault();
-        $super.hide();
+        this.hide();
 
-        if ($super.approveCallback) {
-            $super.approveCallback();
+        if (this.approveCallback) {
+            this.approveCallback();
         }
 
     },
@@ -30,7 +32,7 @@ app.abstract.register("Modal", {
      */
     bindOk: function (params) {
 
-        $super.selector.ok().click($super.realizeOk);
+        this.selector.ok().click(this.realizeOk.bind(this));
 
     }
 

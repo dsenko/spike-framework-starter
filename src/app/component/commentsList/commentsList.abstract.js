@@ -5,11 +5,13 @@ app.abstract.register("CommentsList", {
 
     createCommentsList: function (postId) {
 
+        var self = this;
+
         $comments.getComments(postId)
             .then(function (comments) {
 
                 $commentsList.render(
-                    $super.selector.commentsList(),
+                    self.selector.commentsList(),
                     {
                         comments: comments
                     }

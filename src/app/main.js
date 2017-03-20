@@ -1,8 +1,14 @@
 /**
  * Added example language translation
  */
-app.message.add("en", "i18/en.json");
-app.message.add("pl", "i18/pl.json");
+app.message.add("en", "i18/en.json").then(function(){
+    app.log('Language EN loaded');
+});
+
+app.message.add("pl", "i18/pl.json").then(function(){
+    app.log('Language PL loaded');
+});
+
 /**
  * IMPORTANT Remove this line when go to production
  * For development time it is pretty good to avoid caching files

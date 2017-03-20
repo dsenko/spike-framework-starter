@@ -308,6 +308,7 @@ app.system = {
         INHERIT_ABSTRACT_NOT_EXIST: 'Inheriting abstracts into {0} - some abstracts not exists',
         ABSTRACT_ALREADY_REGISTRED: 'Abstract {0} is already registred',
         INTERCEPTOR_ALREADY_REGISTRED: 'Interceptor {0} is already registred',
+        COMPONENT_NOT_DECLARED: 'Component {0} is not registred',
         COMPONENT_NOT_DECLARED_IN_COMPONENTS: 'Component {0} is not declared in "components" property',
         COMPONENT_NOT_DECLARED_IN_VIEW: 'Component {0} is not declared in parent view',
         PARITAL_INCLUDE_NOT_DEFINED: 'Try including not existing partial',
@@ -514,7 +515,10 @@ app.system = {
      *
      **/
     __throwError: function (errorMessage, errorMessageBinding) {
-        throw new Error('Spike Framework: ' + app.util.System.bindStringParams(errorMessage, errorMessageBinding));
+
+        console.log('throwing error ' + errorMessage);
+
+        throw  Error('Spike Framework: ' + app.util.System.bindStringParams(errorMessage, errorMessageBinding));
     },
 
     /**
@@ -583,7 +587,9 @@ app.system = {
         app.log('Rendering controller {0}', [controllerObject.__name]);
 
         //Scrolling to top of page
-        $(window).scrollTop(0);
+        if(controllerObject.scrollTop == true){
+            $(window).scrollTop(0);
+        }
 
         //Invalidates all existing modals (even hidden)
         app.modal.invalidateAll();
@@ -603,12 +609,28 @@ app.system = {
         controllerObject.__render(controllerInitialData);
 
         app.system.__onRenderEvent();
+        app.system.__checkComponentsIntegrity();
+
 
         if (afterRenderCallback) {
             afterRenderCallback();
         }
 
         app.ok('Selectors cache usage during app lifecycle: ' + app.system.__cacheUsageCounter);
+
+    },
+
+    /**
+     * @private
+     *
+     * Checks if after controller render still exists some unrendered components
+     * If exists, throw errors for all of them
+     */
+    __checkComponentsIntegrity: function () {
+
+        $('component').each(function (i, element) {
+            app.system.__throwError(app.system.__messages.COMPONENT_NOT_DECLARED_IN_COMPONENTS, [$(element).attr('name')]);
+        });
 
     },
 
@@ -712,34 +734,34 @@ app.system = {
         app.warn('Spike version: {0}', [app.version]);
 
         //Waits until document is ready
-        $(document).ready(function () {
+        //$(document).ready(function () {
 
-            //Renders global components defined outside 'spike-view'
-            app.component.__initGlobalComponents();
+        //Renders global components defined outside 'spike-view'
+        app.component.__initGlobalComponents();
 
-            //Registreing router
-            app.router.__registerRouter();
+        //Registreing router
+        app.router.__registerRouter();
 
-            //Renders defined initial view (loading, splash etc)
-            app.system.__initialView();
+        //Renders defined initial view (loading, splash etc)
+        app.system.__initialView();
 
-            app.__cordova.__initializeCordova(function () {
+        app.__cordova.__initializeCordova(function () {
 
-                app.ok('Cordova initialized with app.config.mobileRun = {0}', [app.config.mobileRun]);
+            app.ok('Cordova initialized with app.config.mobileRun = {0}', [app.config.mobileRun]);
 
-                if (app.config.mobileRun) {
-                    app.__cordova.__deviceReadyCallBack = function () {
-                        app.__database.__createDB(callBack);
-                    };
-                } else {
-                    app.events.onDeviceReady();
+            if (app.config.mobileRun) {
+                app.__cordova.__deviceReadyCallBack = function () {
                     app.__database.__createDB(callBack);
-                }
-
-            });
-
+                };
+            } else {
+                app.events.onDeviceReady();
+                app.__database.__createDB(callBack);
+            }
 
         });
+
+
+        // });
 
 
     },
@@ -1016,7 +1038,7 @@ app.router = {
      * @private __pathFunction and @private __otherFunction
      *
      */
-    __getRouterFactory: function(){
+    __getRouterFactory: function () {
         return {
             path: app.router.__pathFunction,
             other: app.router.__otherFunction
@@ -1042,8 +1064,8 @@ app.router = {
      *
      * @param pathObject
      */
-    __otherFunction: function(pathObject){
-         return app.router.__pathFunction(app.router.__otherwiseReplacement, pathObject);
+    __otherFunction: function (pathObject) {
+        return app.router.__pathFunction(app.router.__otherwiseReplacement, pathObject);
     },
 
     /**
@@ -1182,7 +1204,7 @@ app.router = {
 
         if (app.config.routingEnabled) {
 
-            if(window.location.hash.substring(0,2) !== '#/'){
+            if (window.location.hash.substring(0, 2) !== '#/') {
                 window.location.hash = '#/';
             }
 
@@ -1190,8 +1212,10 @@ app.router = {
             app.__starting = false;
 
             $(window).bind('hashchange', function (e) {
+
                 app.router.__renderCurrentView();
                 app.router.__fireRouteEvents(e);
+
             });
 
         }
@@ -1203,13 +1227,13 @@ app.router = {
      *
      * Function iterate all registred events and fire them
      */
-    __fireRouteEvents: function(e){
+    __fireRouteEvents: function (e) {
 
         var currentRoute = app.router.getCurrentRoute();
 
-        $.each(app.router.__events, function(eventName, eventFunction){
+        $.each(app.router.__events, function (eventName, eventFunction) {
 
-            if(eventFunction){
+            if (eventFunction) {
                 eventFunction(e, currentRoute, app.currentController);
             }
 
@@ -1223,9 +1247,9 @@ app.router = {
      *
      * Function registers new route event fired when route changing
      */
-    onRouteChange: function(eventName, eventFunction){
+    onRouteChange: function (eventName, eventFunction) {
 
-        if(app.router.__events[eventName]){
+        if (app.router.__events[eventName]) {
             app.system.__throwWarn(app.system.__messages.ROUTE_EVENT_ALREADY_REGISTRED, [eventName]);
         }
 
@@ -1238,9 +1262,9 @@ app.router = {
      *
      * Function unregisters route event
      */
-    offRouteChange: function(eventName){
+    offRouteChange: function (eventName) {
 
-        if(app.router.__events[eventName]){
+        if (app.router.__events[eventName]) {
             app.router.__events[eventName] = null;
         }
 
@@ -1278,7 +1302,7 @@ app.router = {
      * Function returns object with params stored in current browser URL
      *
      */
-    getURLParams: function(){
+    getURLParams: function () {
         return app.router.__getURLParams();
     },
 
@@ -1292,7 +1316,7 @@ app.router = {
 
         var params = {};
 
-        if(window.location.href.indexOf('?') > -1){
+        if (window.location.href.indexOf('?') > -1) {
             window.location.href.substring(window.location.href.indexOf('?'), window.location.href.length).replace(/[?&]+([^=&]+)=([^&]*)/gi, function (str, key, value) {
                 params[key] = app.util.System.tryParseNumber(value);
             });
@@ -1361,10 +1385,10 @@ app.router = {
                 routingParams: app.router.__endpoints[app.router.__otherwiseReplacement].routingParams,
                 __onRouteEvent: app.router.__endpoints[app.router.__otherwiseReplacement].onRouteEvent,
             };
-        }else{
+        } else {
             currentEndpointData.__controller = currentEndpoint.controller;
-            currentEndpointData.routingParams =  currentEndpoint.routingParams;
-            currentEndpointData.__onRouteEvent =  currentEndpoint.onRouteEvent;
+            currentEndpointData.routingParams = currentEndpoint.routingParams;
+            currentEndpointData.__onRouteEvent = currentEndpoint.onRouteEvent;
         }
 
 
@@ -1425,21 +1449,20 @@ app.router = {
      *
      * @param pathParams
      */
-    setPathParams: function(pathParams){
+    setPathParams: function (pathParams) {
 
         var currentViewData = app.router.__getCurrentViewData();
 
-        for(var pathParam in pathParams){
+        for (var pathParam in pathParams) {
 
-            if(currentViewData.data.pathParams[pathParam]
-            && !app.util.System.isNull(pathParams[pathParam])){
+            if (currentViewData.data.pathParams[pathParam]
+                && !app.util.System.isNull(pathParams[pathParam])) {
                 currentViewData.data.pathParams[pathParam] = pathParams[pathParam];
             }
 
         }
 
         app.router.__redirectToView(currentViewData.endpoint.__pathValue, currentViewData.data.pathParams, currentViewData.data.urlParams);
-
 
 
     },
@@ -1457,14 +1480,14 @@ app.router = {
      *
      * @param urlParams
      */
-    setURLParams: function(urlParams){
+    setURLParams: function (urlParams) {
 
         var currentViewData = app.router.__getCurrentViewData();
 
-        for(var urlParam in urlParams){
+        for (var urlParam in urlParams) {
 
-            if(currentViewData.data.urlParams[urlParam]
-                && !app.util.System.isNull(urlParams[urlParam])){
+            if (currentViewData.data.urlParams[urlParam]
+                && !app.util.System.isNull(urlParams[urlParam])) {
                 currentViewData.data.urlParams[urlParam] = urlParams[urlParam];
             }
 
@@ -1475,13 +1498,13 @@ app.router = {
     },
 
     /**
-    * @public
-    *
-    * Function returns current URI
-    *
-    */
+     * @public
+     *
+     * Function returns current URI
+     *
+     */
     getCurrentRoute: function () {
-       return window.location.hash.replace('#/','');
+        return window.location.hash.replace('#/', '');
     },
 
     /**
@@ -1494,16 +1517,16 @@ app.router = {
      * @param pathParams
      * @param urlParams
      */
-    __redirectToView: function(path, pathParams, urlParams){
+    __redirectToView: function (path, pathParams, urlParams) {
 
-        if(!path){
+        if (!path) {
             app.system.__throwError(app.system.__messages.REDIRECT_NO_PATH);
         }
 
-        path = path.replace('#/','/');
+        path = path.replace('#/', '/');
 
-        if(path[0] !== '/'){
-            path = '/'+path;
+        if (path[0] !== '/') {
+            path = '/' + path;
         }
 
         path = app.util.System.preparePathDottedParams(path, pathParams);
@@ -1543,7 +1566,7 @@ app.router = {
      * @param pathParams
      * @param urlParams
      */
-    redirect: function(path, pathParams, urlParams){
+    redirect: function (path, pathParams, urlParams) {
         app.router.__redirectToView(path, pathParams, urlParams);
     },
 
@@ -1554,12 +1577,12 @@ app.router = {
      *
      * @param path
      */
-    createLink: function(path){
+    createLink: function (path) {
 
-        if(path.substring(0,1) == '/'){
-            path = '#'+path;
-        }else if(path.substring(0,1) !== '#'){
-            path = '#/'+path;
+        if (path.substring(0, 1) == '/') {
+            path = '#' + path;
+        } else if (path.substring(0, 1) !== '#') {
+            path = '#/' + path;
         }
 
         return path;
@@ -1572,7 +1595,7 @@ app.router = {
      * Function forces going to previous page
      *
      */
-    back: function(){
+    back: function () {
         window.history.back();
     }
 
@@ -1746,6 +1769,15 @@ app.config = {
      */
     securityText: 'Site is monitored to prevent attacks. Please leave, otherwise your IP will be blocked',
 
+
+    /**
+     * @private
+     *
+     * Defined safe time after which closed/hidden modal is removed from DOM
+     *
+     */
+
+    __safeModalRemove: 5000,
 
     /**
      * @public
@@ -2312,168 +2344,172 @@ app.__cordova = {
  */
 app.message = {
 
-  /**
-   * @private
-   * Information if translations has been downloaded
-   */
-  __waitingForTranslations: {},
+    /**
+     * @private
+     * Information if translations has been downloaded
+     */
+    __waitingForTranslations: {},
 
-  /**
-   * @private
-   * Storage for translation data
-   */
-  __messages: {},
+    /**
+     * @private
+     * Storage for translation data
+     */
+    __messages: {},
 
-  /**
-   * @public
-   *
-   * Substitute method for register
-   *
-   * @param languageName
-   * @param languageFilePath
-   */
-  add: function (languageName, languageFilePath) {
-    this.register(languageName, languageFilePath);
-  },
+    /**
+     * @public
+     *
+     * Substitute method for register
+     *
+     * @param languageName
+     * @param languageFilePath
+     */
+    add: function (languageName, languageFilePath) {
+        return this.register(languageName, languageFilePath);
+    },
 
-  /**
-   * @public
-   *
-   * Registering new language translation from hosted file
-   * File can be hosted locally or from server
-   *
-   * @param languageName
-   * @param languageFilePath
-   */
-  register: function (languageName, languageFilePath) {
+    /**
+     * @public
+     *
+     * Registering new language translation from hosted file
+     * File can be hosted locally or from server
+     *
+     * @param languageName
+     * @param languageFilePath
+     */
+    register: function (languageName, languageFilePath) {
 
-    app.log('register translation {0}', [languageName]);
+        app.log('register translation {0}', [languageName]);
 
-    app.message.__waitingForTranslations[languageName] = false;
+        app.message.__waitingForTranslations[languageName] = false;
 
-    $.ajax({
-      url: languageFilePath,
-      type: 'GET',
-      success: function (data) {
+        var promise = $.ajax({
+            url: languageFilePath,
+            type: 'GET'
+        });
 
-        app.log('AJAX loaded');
+        promise.then(function (data) {
 
-        app.message.__setTranslation(languageName, data);
+            app.message.__setTranslation(languageName, data);
 
-      },
-      error: function (error) {
+            return data;
 
-        app.log('AJAX error {0} ', [error]);
+        });
 
-        if (error.status == 200) {
-          app.message.__setTranslation(languageName, error.responseText);
-        } else {
-          app.message.__messages[languageName] = {};
-          app.system.__throwWarn(app.system.__messages.TRANSLATION_LOAD_WARN, [languageName, error.status]);
+        promise.catch(function (error) {
+
+            if (error.status == 200) {
+                app.message.__setTranslation(languageName, error.responseText);
+            } else {
+                app.message.__messages[languageName] = {};
+                app.system.__throwWarn(app.system.__messages.TRANSLATION_LOAD_WARN, [languageName, error.status]);
+            }
+
+            return error;
+
+        });
+
+        return promise;
+
+    },
+
+    __setTranslation: function (languageName, translationData) {
+
+        if (typeof translationData === 'string') {
+
+            try {
+                translationData = JSON.parse(translationData);
+            } catch (err) {
+                app.system.__throwError(app.system.__messages.TRANSLATION_PARSING, [languageName]);
+            }
+
         }
 
-      }
-    });
+        app.message.__messages[languageName] = translationData;
+        app.message.__waitingForTranslations[languageName] = true;
+    },
 
-  },
 
-  __setTranslation: function (languageName, translationData) {
+    /**
+     * @public
+     *
+     * Function to retrieve single translation for named message
+     * using existing language from @app.config.lang
+     *
+     * @param messageName
+     */
+    get: function (messageName) {
+        return app.message.__messages[app.config.lang][messageName] || messageName;
+    },
 
-    if (typeof translationData === 'string') {
+    /**
+     * @private
+     *
+     * Function to translate all existing messages in DOM
+     * Wait's until translation file is downloaded
+     *
+     *
+     * @param html
+     */
+    __translate: function () {
 
-      try {
-        translationData = JSON.parse(translationData);
-      } catch (err) {
-        app.system.__throwError(app.system.__messages.TRANSLATION_PARSING, [languageName]);
-      }
+        if (app.message.__waitingForTranslations[app.config.lang] == undefined) {
+            app.system.__throwError(app.system.__messages.TRANSLATION_NOT_EXIST, [app.config.lang])
+        }
 
+        setTimeout(function () {
+
+            if (app.message.__waitingForTranslations[app.config.lang] == true) {
+                app.message.__translateDOM();
+            } else if (app.message.__waitingForTranslations[app.config.lang] == false) {
+                app.message.__translate();
+            }
+
+        }, 100);
+
+    },
+
+    /**
+     * @private
+     *
+     * Function to translate all existing messages in DOM based on @attr spike-translation
+     *
+     * @param html
+     */
+    __translateDOM: function () {
+
+        app.log('__translateDOM');
+
+        //$(document).ready(function () {
+
+        $('[' + app.__attributes.TRANSLATION + ']').each(function () {
+
+            var messageName = $(this).attr(app.__attributes.TRANSLATION);
+            $(this).html(app.message.__messages[app.config.lang][messageName] || messageName);
+
+        });
+
+        //});
+
+    },
+
+    /**
+     * @private
+     *
+     * Replaces all occurences of translation keys to translations
+     * in template html
+     * @param templateHtml
+     */
+    __replaceTemplateKeys: function (templateHtml) {
+
+        for (var messageName in app.message.__messages[app.config.lang]) {
+
+            templateHtml = templateHtml.split('>' + messageName + '<').join('>' + app.message.__messages[app.config.lang][messageName] + '<');
+
+        }
+
+        return templateHtml;
     }
-
-    app.message.__messages[languageName] = translationData;
-    app.message.__waitingForTranslations[languageName] = true;
-  },
-
-
-  /**
-   * @public
-   *
-   * Function to retrieve single translation for named message
-   * using existing language from @app.config.lang
-   *
-   * @param messageName
-   */
-  get: function (messageName) {
-    return app.message.__messages[app.config.lang][messageName] || messageName;
-  },
-
-  /**
-   * @private
-   *
-   * Function to translate all existing messages in DOM
-   * Wait's until translation file is downloaded
-   *
-   *
-   * @param html
-   */
-  __translate: function () {
-
-    if (app.message.__waitingForTranslations[app.config.lang] == undefined) {
-      app.system.__throwError(app.system.__messages.TRANSLATION_NOT_EXIST, [app.config.lang])
-    }
-
-    setTimeout(function () {
-
-      if (app.message.__waitingForTranslations[app.config.lang] == true) {
-        app.message.__translateDOM();
-      } else if (app.message.__waitingForTranslations[app.config.lang] == false) {
-        app.message.__translate();
-      }
-
-    }, 100);
-
-  },
-
-  /**
-   * @private
-   *
-   * Function to translate all existing messages in DOM based on @attr spike-translation
-   *
-   * @param html
-   */
-  __translateDOM: function () {
-
-    app.log('__translateDOM');
-
-    $(document).ready(function () {
-
-      $('[' + app.__attributes.TRANSLATION + ']').each(function () {
-
-        var messageName = $(this).attr(app.__attributes.TRANSLATION);
-        $(this).html(app.message.__messages[app.config.lang][messageName] || messageName);
-
-      });
-
-    });
-
-  },
-
-  /**
-   * @private
-   *
-   * Replaces all occurences of translation keys to translations
-   * in template html
-   * @param templateHtml
-   */
-  __replaceTemplateKeys: function (templateHtml) {
-
-    for(var messageName in app.message.__messages[app.config.lang]){
-
-      templateHtml = templateHtml.split('>'+messageName+'<').join('>'+app.message.__messages[app.config.lang][messageName]+'<');
-
-    }
-
-    return templateHtml;
-  }
 
 };/**
  * @public
@@ -2581,7 +2617,7 @@ app.component = {
                 app.component[componentObject.__name].__globalRendered = true;
             }
 
-            app.component[componentObject.__name] = app.util.System.extend( {}, app.component.__dataArchive[componentObject.__name]);
+            app.component[componentObject.__name] = $.extend(true,  {}, app.component.__dataArchive[componentObject.__name]);
             app.com[componentObject.__name] = app.component[componentObject.__name];
 
             app.com[componentObject.__name].__loadTemplate();
@@ -2595,14 +2631,14 @@ app.component = {
             var componentSelector = $('component[name="' + app.com[componentObject.__name].__lowerCaseName + '"]');
 
             //Throws exception if component was declared in some module ex. controller, but is not declared in it's view
-            if(!componentSelector){
+            if(componentSelector.length === 0){
                 app.system.__throwError(app.system.__messages.COMPONENT_NOT_DECLARED_IN_VIEW, [componentObject.__name]);
             }
 
             app.debug('Reading component {0} inline params', [app.com[componentObject.__name].__name]);
 
             var inlineAttributes = componentSelector.attrs();
-            componentDataPassed = app.util.System.extend( componentDataPassed, inlineAttributes);
+            componentDataPassed = $.extend(true,  componentDataPassed, inlineAttributes);
 
             componentSelector = app.component.__replaceComponent(componentObject.__name, componentSelector, app.com[componentObject.__name].__template);
             app.com[componentObject.__name].__componentSelector = componentSelector;
@@ -2617,7 +2653,7 @@ app.component = {
                 return app.com[componentObject.__name].__componentSelector;
             }
 
-            componentDataPassed = app.util.System.extend( componentDataPassed, app.router.__getCurrentViewData().data);
+            componentDataPassed = $.extend(true,  componentDataPassed, app.router.__getCurrentViewData().data);
 
             app.component.__initComponents(app.com[componentObject.__name].components);
             app.debug('Invoke component {0} init() function', [componentObject.__name]);
@@ -2685,8 +2721,8 @@ app.component = {
         componentObject.__createComponentViewPath(componentObject);
 
         //Creating copy of component object in @private __dataArchive and in component[componentName] variable
-        app.component.__dataArchive[componentObject.__name] = app.util.System.extend( {}, componentObject);
-        app.component[componentObject.__name] = app.util.System.extend( {}, componentObject);
+        app.component.__dataArchive[componentObject.__name] = $.extend(true,  {}, componentObject);
+        app.component[componentObject.__name] = $.extend(true,  {}, componentObject);
 
     },
 
@@ -2742,7 +2778,7 @@ app.component = {
 
                     //Throws exception if component was declared in some view ex controller view, but is not defined
                     if(!app.component[componentName]){
-                        app.system.__throwError(app.system.__messages.COMPONENT_NOT_DECLARED_IN_COMPONENTS, [componentName]);
+                        app.system.__throwError(app.system.__messages.COMPONENT_NOT_DECLARED, [componentName]);
                     }
 
                     app.component[componentName].__render(null);
@@ -2755,7 +2791,7 @@ app.component = {
 
                     //Throws exception if component was declared in some view ex controller view, but is not defined
                     if(!app.component[componentName]){
-                        app.system.__throwError(app.system.__messages.COMPONENT_NOT_DECLARED_IN_COMPONENTS, [componentName]);
+                        app.system.__throwError(app.system.__messages.COMPONENT_NOT_DECLARED, [componentName]);
                     }
 
                     app.component[componentName].__render(componentParams);
@@ -2890,6 +2926,11 @@ app.controller = {
             controllerObject.components = [];
         }
 
+        //Setting @public scrollTop variable if not defined
+        if (!controllerObject.scrollTop) {
+            controllerObject.scrollTop = true;
+        }
+
         //Setting original name of module
         controllerObject.__name = controllerName;
 
@@ -2915,7 +2956,7 @@ app.controller = {
         controllerObject.__render = function (controllerPassedData) {
             app.debug('Invoke controllerObject.__render with params: {0}', [controllerPassedData]);
 
-            app.controller[controllerObject.__name] = app.util.System.extend( {}, app.controller.__dataArchive[controllerObject.__name]);
+            app.controller[controllerObject.__name] = $.extend(true,  {}, app.controller.__dataArchive[controllerObject.__name]);
 
             var __oldControllerName = app.ctx ? app.ctx.__name : null;
 
@@ -3018,8 +3059,8 @@ app.controller = {
         controllerObject.__createControllerViewPath(controllerObject);
 
         //Creating copy of controller object in @private __dataArchive and in controller[controllerName]
-        app.controller.__dataArchive[controllerName] = app.util.System.extend( {}, controllerObject);
-        app.controller[controllerName] = app.util.System.extend( {}, controllerObject);
+        app.controller.__dataArchive[controllerName] = $.extend(true,  {}, controllerObject);
+        app.controller[controllerName] = $.extend(true,  {}, controllerObject);
 
     },
 
@@ -3263,9 +3304,6 @@ app.modal = {
             return app.modal[modalName];
         }
 
-        //Setting default value (modal by default is hidden)
-        modalObject.__hidden = false;
-
         //Setting original name of module
         modalObject.__name = modalName;
 
@@ -3352,7 +3390,7 @@ app.modal = {
         modalObject.__render = function (modalPassedData) {
             app.debug('Invoke modalObject.__render with params: {0}', [modalPassedData]);
 
-            app.modal[modalObject.__name] = app.util.System.extend( {}, app.modal.__dataArchive[modalObject.__name]);
+            app.modal[modalObject.__name] = $.extend(true,  {}, app.modal.__dataArchive[modalObject.__name]);
             app.mCtx[modalObject.__name] = app.modal[modalObject.__name];
 
             app.mCtx[modalObject.__name].__loadTemplate();
@@ -3455,8 +3493,6 @@ app.modal = {
          *
          */
         modalObject.show = function () {
-
-            app.modal[modalObject.__name].__hidden = false;
             app.modal.__onModalShowEvent(app.mCtx[modalObject.__name].__selfSelector(), app.mCtx[modalObject.__name], app.modal.__onModalShowEventDefault);
         };
 
@@ -3468,16 +3504,21 @@ app.modal = {
          *
          */
         modalObject.hide = function () {
-
-            app.modal[modalObject.__name].__hidden = true;
             app.modal.__onModalHideEvent(app.mCtx[modalObject.__name].__selfSelector(), app.mCtx[modalObject.__name], app.modal.__onModalHideEventDefault);
+
+            var wrapperSelector = app.modal[modalObject.__name].__getWrapperModalSelector().parent();
+
+            setTimeout(function(){
+                wrapperSelector.remove();
+            }, app.config.__safeModalRemove);
+
         };
 
         modalObject.__createModalViewPath(modalObject);
 
         //Creating copy of modal object in @private __dataArchive and in modal[modalName] variable
-        app.modal.__dataArchive[modalObject.__name] = app.util.System.extend( {}, modalObject);
-        app.modal[modalObject.__name] = app.util.System.extend( {}, modalObject);
+        app.modal.__dataArchive[modalObject.__name] = $.extend(true,  {}, modalObject);
+        app.modal[modalObject.__name] = $.extend(true,  {}, modalObject);
 
 
     },
@@ -3598,12 +3639,12 @@ app.partial = {
             model = {};
         }
 
-        app.partial[partial.__name] = app.util.System.extend( {}, app.partial.__dataArchive[partial.__name]);
+        app.partial[partial.__name] = $.extend(true,  {}, app.partial.__dataArchive[partial.__name]);
 
 
         app.debug('Returning partial {0} template ', [partial.__name]);
 
-        return partial.__template(app.util.System.extend( partial, model));
+        return partial.__template($.extend(true,  partial, model));
     },
 
     /**
@@ -3668,7 +3709,7 @@ app.partial = {
         partialObject.render = function (selector, model) {
             app.debug('Invoke partialObject.__render');
 
-            var __partialObject = app.util.System.extend( {}, app.partial.__dataArchive[partialObject.__name]);
+            var __partialObject = $.extend(true,  {}, app.partial.__dataArchive[partialObject.__name]);
 
             if (!selector) {
                 app.system.__throwError(app.system.__messages.PARITAL_SELECTOR_NOT_DEFINED, [__partialObject.__name]);
@@ -3676,14 +3717,21 @@ app.partial = {
 
           __partialObject.rootSelector = selector;
 
+            var partialModel = $.extend(true,  __partialObject, model);
+
             if (__partialObject.before && app.util.System.isFunction(__partialObject.before)) {
                 app.debug('Invokes partial  {0} before() function', [__partialObject.__name]);
-                __partialObject.before();
+                var returningModel = __partialObject.before(partialModel);
+
+                if(returningModel && returningModel.__name == __partialObject.__name){
+                    partialModel = returningModel;
+                }
+
             }
 
             app.debug('Binding partial {0} template to passed selector {1} ', [__partialObject.__name, selector]);
 
-            var renderedTemplate = __partialObject.__template(app.util.System.extend( __partialObject, model));
+            var renderedTemplate = __partialObject.__template(partialModel);
 
             //Includes static templates
             renderedTemplate = app.system.__replacePlainTemplates(renderedTemplate);
@@ -3749,8 +3797,8 @@ app.partial = {
         partialObject.__loadTemplate();
 
         //Creating copy of partial object in @private __dataArchive and in partial[partialName]
-        app.partial.__dataArchive[partialName] = app.util.System.extend( {}, partialObject);
-        app.partial[partialName] = app.util.System.extend( {}, partialObject);
+        app.partial.__dataArchive[partialName] = $.extend(true,  {}, partialObject);
+        app.partial[partialName] = $.extend(true,  {}, partialObject);
 
     },
 
@@ -3811,10 +3859,10 @@ app.abstract = {
      * Substitute method for register
      *
      * @param abstractName
-     * @param abstractFunction
+     * @param abstractObject
      */
-    add: function (abstractName, abstractFunction) {
-        this.register(abstractName, abstractFunction);
+    add: function (abstractName, abstractObject) {
+        this.register(abstractName, abstractObject);
     },
 
 
@@ -3827,7 +3875,7 @@ app.abstract = {
      * @param abstractName
      * @param abstractObject
      */
-    register: function (abstractName, abstractFunction) {
+    register: function (abstractName, abstractObject) {
 
         //Checks if name is not restricted
         app.system.__filterRestrictedNames(abstractName);
@@ -3836,10 +3884,10 @@ app.abstract = {
             app.system.__throwError(app.system.__messages.ABSTRACT_ALREADY_REGISTRED,[abstractName]);
         }
 
-        app.abstract[abstractName] = {
-            abstractFunction: abstractFunction,
-            __name: abstractName
-        }
+        abstractObject.__name = abstractName;
+
+        app.abstract[abstractName] = abstractObject;
+
     },
 
     /**
@@ -3920,7 +3968,7 @@ app.abstract = {
      *
      */
     __extend: function(extendObjectName, extendedObject){
-        return app.abstract[extendObjectName].abstractFunction(extendedObject);
+        return $.extend(true, {}, app.abstract[extendObjectName], extendedObject);
     }
 
 };/**
@@ -4096,7 +4144,7 @@ app.global = {
 
         };
 
-        this.__value = value;
+      app.global[globalName].__value = globalInitialValue;
 
     },
 
@@ -4655,35 +4703,18 @@ app.util = {
             app.util.System.createCookie(name, "", -1);
         },
 
-        extend: function(obj1, obj2, obj3){
+        escapeQuotes: function (text) {
 
-            var result = {};
-
-            if(obj1){
-                result = app.util.System.mergeObjects(result, obj1);
+            try {
+                text = text.replace(/'/g, "\\'");
+            } catch (err) {
+                app.warn('Could not escape single quotes in string: ' + text);
             }
 
-            if(obj2){
-                result = app.util.System.mergeObjects(result, obj2);
-            }
-
-            if(obj3){
-                result = app.util.System.mergeObjects(result, obj3);
-            }
-
-            return result;
-
-        },
-
-        mergeObjects: function(obj1, obj2){
-
-            for(var prop in obj1){
-                obj2[prop] = obj1[prop];
-            }
-
-            return obj2;
+            return text;
 
         }
+
 
     }
 };
@@ -6304,54 +6335,13 @@ app.rest = {
                 dataType: dataType
             });
 
-            promise.result = null;
+            promise.then(function(result){
+                app.rest.__invokeInterceptors(result, promise, interceptors);
+            });
 
-            // promise.__chains = [];
-            //
-            // promise.chain = function(processFunction){
-            //
-            //     promise.__chains.push(processFunction);
-            //
-            //     return promise;
-            //
-            // }
-            //
-            // promise.__processChains = function(){
-            //
-            //     for(var i = 0; i < promise.__chains.length; i++){
-            //         promise.result = promise.__chains[i](promise.result);
-            //     }
-            //
-            // }
-
-            promise.then = function(callback){
-
-                promise.done(function(result){
-
-                    if(promise.result){
-                        result = promise.result;
-                    }
-
-                    app.rest.__invokeInterceptors(result, promise, interceptors);
-
-                    var _result = callback(result, promise);
-
-                    if(_result){
-                        promise.result = _result;
-                    }
-
-                });
-
-                return promise;
-            };
-
-            promise.catch = function(callback){
-                promise.fail(function(error){
-                    app.rest.__invokeInterceptors(error, promise, interceptors);
-					callback(error, promise);
-				});
-                return promise;
-            };
+            promise.catch(function(error){
+                app.rest.__invokeInterceptors(error, promise, interceptors);
+            });
 
             return promise;
 
@@ -6430,41 +6420,19 @@ app.rest = {
                 dataType: dataType
             });
 
-           
-            promise.then = function(callback){
+            promise.then(function(result){
+                app.rest.__invokeInterceptors(result, promise, interceptors);
+            });
 
-                promise.done(function(result){
-
-                    if(promise.result){
-                        result = promise.result;
-                    }
-
-                    app.rest.__invokeInterceptors(result, promise, interceptors);
-
-                    var _result = callback(result, promise);
-
-                    if(_result){
-                        promise.result = _result;
-                    }
-
-                });
-
-                return promise;
-            };
-
-            promise.catch = function(callback){
-                promise.fail(function(error){
-                    app.rest.__invokeInterceptors(error, promise, interceptors);
-					callback(error, promise);
-				});
-                return promise;
-            };
+            promise.catch(function(error){
+                app.rest.__invokeInterceptors(error, promise, interceptors);
+            });
 
             return promise;
 
         });
 
-    }
+    },
 
 
 };/**
@@ -6676,7 +6644,7 @@ app.modal.implement('render', function(modalSelector, modalObject){
         }
 
         modalSelector.on('hidden.bs.modal', function () {
-            modalObject.__hidden = true;
+            modalObject.hide();
         })
     }
 

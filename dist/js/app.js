@@ -49,16 +49,17 @@ app.config.extend({
 
 /**SPIKE_IMPORT_END**/ 
 /** 'import $commentsList as app.partial.CommentsList'; **/
-/** 'import $comments as app.service.Comments'; **/app.abstract.register("CommentsList",function($super){ 
-  $super = app.util.System.extend($super,    {
+/** 'import $comments as app.service.Comments'; **/app.abstract.register("CommentsList", {
 
     createCommentsList: function (postId) {
+
+        var self = this;
 
         app.service.Comments.getComments(postId)
             .then(function (comments) {
 
                 app.partial.CommentsList.render(
-                    $super.selector.commentsList(),
+                    self.selector.commentsList(),
                     {
                         comments: comments
                     }
@@ -69,30 +70,29 @@ app.config.extend({
             });
     }
 
-} 
- ); return $super; 
-} );/**SPIKE_IMPORT_END**/ 
-/** 'import $router as app.router'; **/app.abstract.register("Modal",function($super){ 
-  $super = app.util.System.extend($super,    {
+});/**SPIKE_IMPORT_END**/ 
+/** 'import $router as app.router'; **/app.abstract.register("Modal", {
 
     /**
      * some import
      */
     bindCancel: function () {
 
-        $super.selector.close().click(function (e) {
+        var self = this;
+
+        self.selector.close().click(function (e) {
             e.preventDefault();
-            $super.hide();
+            self.hide();
         });
 
     },
 
     realizeOk: function (e) {
         e.preventDefault();
-        $super.hide();
+        this.hide();
 
-        if ($super.approveCallback) {
-            $super.approveCallback();
+        if (this.approveCallback) {
+            this.approveCallback();
         }
 
     },
@@ -103,13 +103,11 @@ app.config.extend({
      */
     bindOk: function (params) {
 
-        $super.selector.ok().click($super.realizeOk);
+        this.selector.ok().click(this.realizeOk.bind(this));
 
     }
 
-} 
- ); return $super; 
-} );/**SPIKE_IMPORT_END**/ 
+});/**SPIKE_IMPORT_END**/ 
 /** 'import $commentsList as app.partial.CommentsList'; **/
 /** 'import $comments as app.service.Comments'; **/app.component.register("CommentsList", {
 
@@ -157,6 +155,7 @@ app.component.register("Footer", {
 
         app.service.Post.getRecentPosts()
             .then(function (posts) {
+
                 app.component.PostsList.createPostsList(posts, 5);
             })
             .catch(function (error) {
@@ -217,24 +216,26 @@ app.component.register("Footer", {
         });
 
         app.component.TopMenu.selector.changeLangToEn().click(function(){
-            app.system.changeLanguage('en');
-            app.component.TopMenu.setLanguageText();
+            app.component.TopMenu.changeLanguage('en');
         });
 
         app.component.TopMenu.selector.changeLangToPl().click(function(){
-            app.system.changeLanguage('pl');
-            app.component.TopMenu.setLanguageText();
+            app.component.TopMenu.changeLanguage('pl');
         });
 
         app.component.TopMenu.selectCurrent(app.router.getCurrentRoute());
 
         app.router.onRouteChange('topMenu', function(e, currentRoute, currentController){
             app.component.TopMenu.selectCurrent(currentRoute);
-            app.component.TopMenu.selector.dropdown().slideUp(200);
         });
 
     },
 
+    changeLanguage: function(lang){
+        app.system.changeLanguage(lang);
+        app.component.TopMenu.setLanguageText();
+        app.component.TopMenu.selector.dropdown().slideUp(200);
+    },
 
     selectCurrent: function(currentRoute){
 
@@ -249,6 +250,8 @@ app.component.register("Footer", {
         if(app.component.TopMenu.selector[currentRoute]){
             app.component.TopMenu.selector[currentRoute]().addClass('active');
         }
+
+        app.component.TopMenu.selector.dropdown().slideUp(200);
 
     },
 
@@ -439,6 +442,7 @@ app.controller.register("Posts", {
         return app.rest.get(app.service.Post.cachedPosts || app.config.apiUrl + '/posts')
             .then(function (result) {
                 app.service.Post.cachedPosts = result;
+                return result;
             });
 
     },
@@ -450,6 +454,7 @@ app.controller.register("Posts", {
         })
             .then(function (result) {
                 app.service.Post.cachedPosts = result;
+                return result;
             });
 
     },
@@ -466,21 +471,21 @@ app.controller.register("Posts", {
 
     },
 
-    savePost: function(post){
+    savePost: function (post) {
 
         var postIndex = app.util.List.findIndexByProperty(app.service.Post.cachedPosts, 'id', post.id);
 
-        if(postIndex && app.service.Post.cachedPosts[postIndex]){
+        if (postIndex && app.service.Post.cachedPosts[postIndex]) {
             app.service.Post.cachedPosts[postIndex] = post;
         }
 
     },
 
-    deletePost: function(post){
+    deletePost: function (post) {
 
         var postIndex = app.util.List.findIndexByProperty(app.service.Post.cachedPosts, 'id', post.id);
 
-        if(postIndex && app.service.Post.cachedPosts[postIndex]){
+        if (postIndex && app.service.Post.cachedPosts[postIndex]) {
             app.service.Post.cachedPosts = app.util.List.removeFromList(app.service.Post.cachedPosts, postIndex);
         }
 
@@ -496,6 +501,10 @@ app.partial.register("CommentsList", {
 /** 'import $router as app.router'; **/app.partial.register("PostsList", {
 
     replace: true,
+
+    before: function(model){
+        model.limit = 10;
+    },
 
     selectPost: function (postId) {
 
@@ -565,8 +574,14 @@ app.util.register("List", {
 /**
  * Added example language translation
  */
-app.message.add("en", "i18/en.json");
-app.message.add("pl", "i18/pl.json");
+app.message.add("en", "i18/en.json").then(function(){
+    app.log('Language EN loaded');
+});
+
+app.message.add("pl", "i18/pl.json").then(function(){
+    app.log('Language PL loaded');
+});
+
 /**
  * IMPORTANT Remove this line when go to production
  * For development time it is pretty good to avoid caching files

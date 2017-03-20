@@ -135,7 +135,6 @@
 ; html += '    <p spike-translation="recent_posts">recent_posts</p>' 
 ; html += '' 
 ; html += '    <component name="postsList"></component>' 
-; html += '' 
 ; html += '</div>' 
 ; html += '' 
 ; return html 

@@ -10,6 +10,7 @@ app.service.register("Post", {
         return $rest.get($this.cachedPosts || app.config.apiUrl + '/posts')
             .then(function (result) {
                 $this.cachedPosts = result;
+                return result;
             });
 
     },
@@ -21,6 +22,7 @@ app.service.register("Post", {
         })
             .then(function (result) {
                 $this.cachedPosts = result;
+                return result;
             });
 
     },
@@ -37,21 +39,21 @@ app.service.register("Post", {
 
     },
 
-    savePost: function(post){
+    savePost: function (post) {
 
         var postIndex = $listUtil.findIndexByProperty($this.cachedPosts, 'id', post.id);
 
-        if(postIndex && $this.cachedPosts[postIndex]){
+        if (postIndex && $this.cachedPosts[postIndex]) {
             $this.cachedPosts[postIndex] = post;
         }
 
     },
 
-    deletePost: function(post){
+    deletePost: function (post) {
 
         var postIndex = $listUtil.findIndexByProperty($this.cachedPosts, 'id', post.id);
 
-        if(postIndex && $this.cachedPosts[postIndex]){
+        if (postIndex && $this.cachedPosts[postIndex]) {
             $this.cachedPosts = $listUtil.removeFromList($this.cachedPosts, postIndex);
         }
 
