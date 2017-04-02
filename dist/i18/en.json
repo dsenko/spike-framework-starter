@@ -1,4 +1,6 @@
 {
+  "test1" : "test {0} {1}",
+  "test2" : "test {name} {id}",
   "footer_all_right" : "All rights reserved",
   "menu_posts": "Posts",
   "menu_about" : "About",

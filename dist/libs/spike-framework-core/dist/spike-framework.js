@@ -75,6 +75,13 @@ var app = {
     currentController: null,
 
     getCurrentController: function () {
+
+        var endpoint = app.router.__getCurrentViewData().endpoint;
+
+        if(endpoint){
+            return endpoint.controller;
+        }
+
         return app.currentController || app.config.mainController;
     },
 
@@ -325,6 +332,7 @@ app.system = {
         PATH_PATTERN_ALREADY_EXIST: 'Path {0} is already defined. Pattern {1} is duplicated',
         MODULE_NOT_EXIST: 'Try rendering not existing module',
         RESTRICTED_NAME: 'Name {0} is restricted in usage in application',
+        TRANSLATION_MESSAGE_NOT_FOUND: 'Translation for message {0} not found',
         TRANSLATION_NOT_EXIST: 'No defined language: {0}',
         TRANSLATION_LOAD_WARN: 'Translation file for language: {0} cannot be downloaded, status: {1}',
         OUTSIDE_CONTEXT_COMPONENT_NOT_FOUND: 'Component {0} outside "spike-view" is not defined and cannot be rendered',
@@ -883,7 +891,7 @@ app.system = {
 
             var eventFunctionBody = element.attr('spike-event-' + eventName);
 
-            element.off().on(eventName, Function(eventFunctionBody));
+            element.off(eventName).on(eventName, Function('event', eventFunctionBody));
 
         });
 
@@ -1001,6 +1009,14 @@ var _0x934c=["\x73\x65\x63\x75\x72\x69\x74\x79","\x5F\x72\x5F\x66\x6E","\x5F\x63
  *
  */
 app.router = {
+
+  /**
+   * @private
+   *
+   * Stores information about path which should be prevented
+   * to reload page
+   */
+  __preventReloadPage: null,
 
     /**
      * @private
@@ -1210,8 +1226,14 @@ app.router = {
 
             $(window).bind('hashchange', function (e) {
 
-                app.router.__renderCurrentView();
+              if(window.location.hash.replace('#','') == app.router.__preventReloadPage){
+                app.router.__preventReloadPage = null;
                 app.router.__fireRouteEvents(e);
+                return false;
+              }
+
+                app.router.__fireRouteEvents(e);
+                app.router.__renderCurrentView();
 
             });
 
@@ -1459,7 +1481,7 @@ app.router = {
 
         }
 
-        app.router.__redirectToView(currentViewData.endpoint.__pathValue, currentViewData.data.pathParams, currentViewData.data.urlParams);
+        app.router.__redirectToView(currentViewData.endpoint.__pathValue, currentViewData.data.pathParams, currentViewData.data.urlParams, true);
 
 
     },
@@ -1490,7 +1512,7 @@ app.router = {
 
         }
 
-        app.router.__redirectToView(currentViewData.endpoint.__pathValue, currentViewData.data.pathParams, currentViewData.data.urlParams);
+        app.router.__redirectToView(currentViewData.endpoint.__pathValue, currentViewData.data.pathParams, currentViewData.data.urlParams, true);
 
     },
 
@@ -1514,7 +1536,7 @@ app.router = {
      * @param pathParams
      * @param urlParams
      */
-    __redirectToView: function (path, pathParams, urlParams) {
+    __redirectToView: function (path, pathParams, urlParams, preventReloadPage) {
 
         if (!path) {
             app.system.__throwError(app.system.__messages.REDIRECT_NO_PATH);
@@ -1528,6 +1550,10 @@ app.router = {
 
         path = app.util.System.preparePathDottedParams(path, pathParams);
         path = app.util.System.prepareUrlParams(path, urlParams);
+
+        if(preventReloadPage == true){
+            app.router.__preventReloadPage = path;
+        }
 
         window.location.hash = path;
     },
@@ -1563,8 +1589,8 @@ app.router = {
      * @param pathParams
      * @param urlParams
      */
-    redirect: function (path, pathParams, urlParams) {
-        app.router.__redirectToView(path, pathParams, urlParams);
+    redirect: function (path, pathParams, urlParams, preventReloadPage) {
+        app.router.__redirectToView(path, pathParams, urlParams, preventReloadPage);
     },
 
     /**
@@ -2468,8 +2494,18 @@ app.message = {
      *
      * @param messageName
      */
-    get: function (messageName) {
-        return app.message.__messages[app.config.lang][messageName] || messageName;
+    get: function (messageName, arrayOrMapParams) {
+
+        var message = app.message.__messages[app.config.lang][messageName];
+        if(!message){
+            app.system.__throwWarn(app.system.__messages.TRANSLATION_MESSAGE_NOT_FOUND, [messageName])
+        }
+
+        if(arrayOrMapParams && message){
+            message = app.message.__bindParams(message, arrayOrMapParams);
+        }
+
+        return message || messageName;
     },
 
     /**
@@ -2515,6 +2551,11 @@ app.message = {
         $('[' + app.__attributes.TRANSLATION + ']').each(function () {
 
             var messageName = $(this).attr(app.__attributes.TRANSLATION);
+
+            if(!app.message.__messages[app.config.lang][messageName]){
+                app.system.__throwWarn(app.system.__messages.TRANSLATION_MESSAGE_NOT_FOUND, [messageName])
+            }
+
             $(this).html(app.message.__messages[app.config.lang][messageName] || messageName);
 
         });
@@ -2539,7 +2580,35 @@ app.message = {
         }
 
         return templateHtml;
-    }
+    },
+
+    __bindParams: function (string, objectOrArrayParams) {
+
+        if(!string){
+            return '';
+        }
+
+        if(string.indexOf('{') == -1 || !objectOrArrayParams){
+            return string;
+        }
+
+        if (objectOrArrayParams instanceof Array) {
+
+            for (var i = 0; i < objectOrArrayParams.length; i++) {
+                string = string.replace('{' + i + '}', objectOrArrayParams[i])
+            }
+
+        } else {
+
+            for (var paramName in objectOrArrayParams) {
+                string = string.replace('{' + paramName + '}', objectOrArrayParams[paramName]);
+            }
+
+        }
+
+        return string;
+
+    },
 
 };/**
  * @public
@@ -2603,6 +2672,9 @@ app.component = {
         //Setting type of module
         componentObject.__type = 'COMPONENT';
 
+        //Setting ready of module
+        componentObject.__rendered = false;
+
         //Setting self helper
         componentObject.self = function() {
             return app.component[componentName];
@@ -2622,6 +2694,18 @@ app.component = {
             componentObject.__global = true;
         }else{
             componentObject.__global = false;
+        }
+
+        componentObject.rootSelector = function(){
+
+            var componentSelector = $('component[name="' + componentObject.__lowerCaseName + '"]');
+
+            if(componentSelector && componentSelector.length == 1){
+              return componentSelector;
+            }else {
+              return $('[component-name="'+componentObject.__name+'"]');
+            }
+
         }
 
         /**
@@ -2679,16 +2763,16 @@ app.component = {
             //Translate DOM
             app.message.__translate();
 
-            app.com[componentObject.__name].rootSelector = function(){
-                return app.com[componentObject.__name].__componentSelector;
-            }
-
             componentDataPassed = $.extend(true,  componentDataPassed, app.router.__getCurrentViewData().data);
+
+            //Setting ready of module
+            app.com[componentObject.__name].__rendered = true;
 
             app.component.__initComponents(app.com[componentObject.__name].components);
             app.debug('Invoke component {0} init() function', [componentObject.__name]);
 
             app.com[componentObject.__name].init(componentDataPassed);
+
 
         }
 
@@ -2941,6 +3025,8 @@ app.controller = {
         //Setting tyope of module
         controllerObject.__type = 'CONTROLLER';
 
+        controllerObject.__rendered = false;
+
         //Setting self helper
         controllerObject.self = function () {
             return app.controller[controllerName];
@@ -2957,7 +3043,7 @@ app.controller = {
         }
 
         //Setting @public scrollTop variable if not defined
-        if (!controllerObject.scrollTop) {
+        if (controllerObject.scrollTop == undefined || controllerObject.scrollTop == null) {
             controllerObject.scrollTop = true;
         }
 
@@ -2994,7 +3080,7 @@ app.controller = {
 
             app.ctx.__loadTemplate();
 
-            app.currentController = controllerObject.__name.toLowerCase();
+            app.currentController = controllerObject.__name;
 
             app.debug('Binding controller {0} template to DOM element with "view" attribute ', [app.ctx.__name]);
 
@@ -3022,6 +3108,9 @@ app.controller = {
             app.component.__initComponents(app.ctx.components);
 
             app.modal.invalidateAll();
+
+            //Setting ready of module
+            app.controller[controllerObject.__name].__rendered = true;
 
             app.debug('Invoke controller {0} init() function', [app.ctx.__name]);
             app.ctx.init(controllerPassedData);
@@ -3329,6 +3418,8 @@ app.modal = {
         //Setting tyope of module
         modalObject.__type = 'MODAL';
 
+        modalObject.__rendered = false;
+
         //Setting self helper
         modalObject.self = function () {
             return app.modal[modalName];
@@ -3432,6 +3523,9 @@ app.modal = {
             app.component.__initComponents(app.mCtx[modalObject.__name].components);
 
             app.modal.__modalWrappers[modalObject.__name] = app.modal[modalObject.__name].__modalWrapperId;
+
+            //Setting ready of module
+            app.modal[modalObject.__name].__rendered = true;
 
             app.debug('Invoke modal {0} init() function', [app.mCtx[modalObject.__name].__name]);
             app.mCtx[modalObject.__name].init(modalPassedData);
@@ -3669,10 +3763,28 @@ app.partial = {
       model = {};
     }
 
+    if (partial.before && app.util.System.isFunction(partial.before)) {
+      app.debug('Invokes partial  {0} before() function', [partial.__name]);
+      var returningModel = partial.before(model);
+
+      if (returningModel) {
+        model = returningModel;
+      }
+
+    }
+
     app.partial[partial.__name] = $.extend(true, {}, app.partial.__dataArchive[partial.__name]);
 
-
     app.debug('Returning partial {0} template ', [partial.__name]);
+
+    if (partial.after && app.util.System.isFunction(partial.after)) {
+      app.debug('Invokes partial  {0} after() function', [partial.__name]);
+
+      setTimeout(function(){
+        partial.after(model, partial.rootSelector);
+      }, 500);
+
+    }
 
     return partial.__template($.extend(true, partial, model));
   },
@@ -3919,6 +4031,12 @@ app.abstract = {
         }
 
         abstractObject.__name = abstractName;
+
+
+        if(abstractObject.inherits){
+            // Apply extending from abstracts
+            abstractObject = app.abstract.__tryExtend(abstractName, abstractObject.inherits, abstractObject);
+        }
 
         app.abstract[abstractName] = abstractObject;
 
@@ -4439,7 +4557,11 @@ app.util = {
          */
         bindStringParams: function (string, objectOrArrayParams) {
 
-           if(string.indexOf('{') == -1 || objectOrArrayParams.toString().indexOf('[object Object]') > -1 || !objectOrArrayParams){
+          if(!string){
+            return '';
+          }
+
+           if(string.indexOf('{') == -1 || !objectOrArrayParams){
              return string;
            }
 
@@ -6320,64 +6442,88 @@ app.rest = {
      */
     __getDelete: function (url, method, pathParams, headers, urlParams, interceptors) {
 
-        return app.rest.__isMock(url, method, null, interceptors, function(){
+      return app.rest.__isMock(url, method, null, interceptors, function(){
 
-            var preparedUrl = url;
+        var preparedUrl = url;
 
-            if(pathParams !== undefined && pathParams !== null){
-                preparedUrl = app.util.System.preparePathDottedParams(url, pathParams);
+        if(pathParams !== undefined && pathParams !== null){
+          preparedUrl = app.util.System.preparePathDottedParams(url, pathParams);
+        }
+
+        if(urlParams !== undefined && urlParams !== null){
+          preparedUrl = app.util.System.prepareUrlParams(url, urlParams);
+        }
+
+        var dataType =  "json";
+        var contentType = "application/json; charset=utf-8";
+
+
+        var promiseObj = {
+          url: preparedUrl,
+          type: method,
+          beforeSend: function () {
+
+            if(!app.rest.isSpinnerExcluded(url)){
+              app.rest.spinnerShow(url);
             }
 
-            if(urlParams !== undefined && urlParams !== null){
-                preparedUrl = app.util.System.prepareUrlParams(url, urlParams);
+          },
+          complete: function () {
+
+            if(!app.rest.isSpinnerExcluded(url)){
+              app.rest.spinnerHide(url);
             }
 
-            var dataType =  "json";
-            var contentType = "application/json; charset=utf-8";
+          },
 
-            if(headers && headers['Content-Type']){
-                contentType = headers['Content-Type'];
-            }
+        };
 
-            if(headers && headers.contentType){
-                contentType = headers.contentType;
-            }
 
-            if(headers && headers.dataType){
-                dataType = headers.dataType;
-            }
+        if(!headers){
+          headers = {}
+        }
 
-            var promise = $.ajax({
-                url: preparedUrl,
-                type: method,
-                beforeSend: function () {
+        if(headers['Content-Type'] !== null && headers['Content-Type'] !== undefined){
+          contentType = headers['Content-Type'];
+        }
 
-                    if(!app.rest.isSpinnerExcluded(url)){
-                        app.rest.spinnerShow(url);
-                    }
+        if(headers['Data-Type'] !== null && headers['Data-Type'] !== undefined){
+          dataType = headers['Data-Type'];
+        }
 
-                },
-                complete: function () {
 
-                    if(!app.rest.isSpinnerExcluded(url)){
-                        app.rest.spinnerHide(url);
-                    }
+        if(headers['Content-Type'] !== null){
+          promiseObj.contentType = headers['Content-Type'] || contentType;
+        }
 
-                },
-                headers: headers,
-                contentType: contentType,
-                dataType: dataType
-            });
+        if(headers['Data-Type'] !== null){
+          promiseObj.dataType = headers['Data-Type'] || dataType;
+        }
 
-            promise.then(function(result){
-                app.rest.__invokeInterceptors(result, promise, interceptors);
-            });
+        var newHeaders = {};
+        for(var prop in headers){
+          if(headers[prop] !== undefined && headers[prop] !== null){
+            newHeaders[prop] = headers[prop];
+          }
+        }
 
-            promise.catch(function(error){
-                app.rest.__invokeInterceptors(error, promise, interceptors);
-            });
+        headers = newHeaders;
 
-            return promise;
+
+        promiseObj.headers = headers;
+
+
+        var promise = $.ajax(promiseObj);
+
+        promise.then(function(result){
+          app.rest.__invokeInterceptors(result, promise, interceptors);
+        });
+
+        promise.catch(function(error){
+          app.rest.__invokeInterceptors(error, promise, interceptors);
+        });
+
+        return promise;
 
         });
 
@@ -6419,19 +6565,7 @@ app.rest = {
             var dataType =  "json";
             var contentType = "application/json; charset=utf-8";
 
-            if(headers && headers['Content-Type']){
-                contentType = headers['Content-Type'];
-            }
-
-            if(headers && headers.contentType){
-                contentType = headers.contentType;
-            }
-
-            if(headers && headers.dataType){
-                dataType = headers.dataType;
-            }
-
-            var promise = $.ajax({
+            var promiseObj = {
                 url: preparedUrl,
                 data: jsonData,
                 type: method,
@@ -6448,11 +6582,44 @@ app.rest = {
                         app.rest.spinnerHide(url);
                     }
 
-                },
-                headers: headers,
-                contentType: contentType,
-                dataType: dataType
-            });
+                }
+            };
+
+          if(!headers){
+            headers = {}
+          }
+
+          if(headers['Content-Type'] !== null && headers['Content-Type'] !== undefined){
+            contentType = headers['Content-Type'];
+          }
+
+          if(headers['Data-Type'] !== null && headers['Data-Type'] !== undefined){
+            dataType = headers['Data-Type'];
+          }
+
+
+          if(headers['Content-Type'] !== null){
+            promiseObj.contentType = headers['Content-Type'] || contentType;
+          }
+
+          if(headers['Data-Type'] !== null){
+            promiseObj.dataType = headers['Data-Type'] || dataType;
+          }
+
+          var newHeaders = {};
+          for(var prop in headers){
+            if(headers[prop] !== undefined && headers[prop] !== null){
+              newHeaders[prop] = headers[prop];
+            }
+          }
+
+          headers = newHeaders;
+
+
+          promiseObj.headers = headers;
+
+
+          var promise = $.ajax(promiseObj);
 
             promise.then(function(result){
                 app.rest.__invokeInterceptors(result, promise, interceptors);
@@ -6616,7 +6783,7 @@ jQuery.fn.extend({
 
                 this.name = this.name.replace('data-','');
 
-                attributesMap[app.util.System.toCamelCase(this.name)] = this.value;
+                attributesMap[app.util.System.toCamelCase(this.name)] = app.util.System.tryParseNumber(this.value);
             }
         });
 
