@@ -14,7 +14,6 @@ app.controller.register("Home", {
 
         $events.listen('EnterToPostEvent', function(eventData){
            app.log('User enters to Post controller with data');
-           app.obj(eventData);
         });
 
     }

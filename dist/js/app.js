@@ -49,8 +49,10 @@ app.config.extend({
 });
 
 /**SPIKE_IMPORT_END**/ 
-/** 'import $commentsList as app.partial.CommentsList'; **/
-/** 'import $comments as app.service.Comments'; **/app.abstract.register("CommentsList", {
+/**'import app.service.CommentsList as app.partial.CommentsList';
+'import app.service.Comments as app.service.Comments';
+
+**/app.abstract.register("CommentsList", {
 
     createCommentsList: function (postId) {
 
@@ -59,7 +61,7 @@ app.config.extend({
         app.service.Comments.getComments(postId)
             .then(function (comments) {
 
-                app.partial.CommentsList.render(
+                app.service.CommentsList.render(
                     self.selector.commentsList(),
                     {
                         comments: comments
@@ -72,7 +74,9 @@ app.config.extend({
     }
 
 });/**SPIKE_IMPORT_END**/ 
-/** 'import $router as app.router'; **/app.abstract.register("Modal", {
+/**'import app.router as app.router';
+
+**/app.abstract.register("Modal", {
 
     /**
      * some import
@@ -109,8 +113,10 @@ app.config.extend({
     }
 
 });/**SPIKE_IMPORT_END**/ 
-/** 'import $commentsList as app.partial.CommentsList'; **/
-/** 'import $comments as app.service.Comments'; **/app.component.register("CommentsList", {
+/**'import app.service.CommentsList as app.partial.CommentsList';
+'import app.service.Comments as app.service.Comments';
+
+**/app.component.register("CommentsList", {
 
     inherits: [
         app.abstract.CommentsList,
@@ -126,7 +132,8 @@ app.config.extend({
 
 
 
-});/**SPIKE_IMPORT_END**/ 
+});
+/**SPIKE_IMPORT_END**/ 
 app.component.register("Footer", {
 
     global: true,
@@ -138,9 +145,11 @@ app.component.register("Footer", {
 
 });
 /**SPIKE_IMPORT_END**/ 
-/** 'import $postService as app.service.Post'; **/
-/** 'import $router as app.router'; **/
-/** 'import $postsList as app.partial.PostsList'; **/app.component.register("PostsList", {
+/**'import app.service.Post as app.service.Post';
+'import app.router as app.router';
+'import app.partial.PostsList as app.partial.PostsList';
+
+**/app.component.register("PostsList", {
 
     init: function (data) {
 
@@ -188,8 +197,11 @@ app.component.register("Footer", {
     }
 
 
-});/**SPIKE_IMPORT_END**/ 
-/** 'import $this as app.component.Spinner'; **/app.component.register("Spinner", {
+});
+/**SPIKE_IMPORT_END**/ 
+/**'import app.component.Spinner as app.component.Spinner';
+
+**/app.component.register("Spinner", {
 
     global: true,
 
@@ -204,9 +216,12 @@ app.component.register("Footer", {
         app.component.Spinner.selector.spinner().hide();
     }
 
-});/**SPIKE_IMPORT_END**/ 
-/** 'import $router as app.router'; **/
-/** 'import $system as app.system'; **/app.component.register("TopMenu", {
+});
+/**SPIKE_IMPORT_END**/ 
+/**'import app.router as app.router';
+'import app.system as app.system';
+
+**/app.component.register("TopMenu", {
 
     global: true,
 
@@ -260,15 +275,18 @@ app.component.register("Footer", {
         app.component.TopMenu.selector.currentLang().attr('spike-translation', 'language_'+app.config.lang);
     }
 
-});/**SPIKE_IMPORT_END**/ 
+});
+/**SPIKE_IMPORT_END**/ 
 app.controller.register("About", {
 
     init: function () {
     }
 
 });/**SPIKE_IMPORT_END**/ 
-/** 'import $this as app.controller.Comments'; **/
-/** 'import $router as app.router'; **/app.controller.register("Comments", {
+/**'import app.controller.Comments as app.controller.Comments';
+'import app.router as app.router';
+
+**/app.controller.register("Comments", {
 
     components: ['CommentsList'],
 
@@ -277,10 +295,12 @@ app.controller.register("About", {
 
 
 });/**SPIKE_IMPORT_END**/ 
-/** 'import $router as app.router'; **/
-/** 'import $system as app.system'; **/
-/** 'import $postService as app.service.Post'; **/
-/** 'import $confirmModal as app.modal.ConfirmDelete'; **/app.controller.register("EditPost", {
+/**'import app.router as app.router';
+'import app.system as app.system';
+'import app.service.Post as app.service.Post';
+'import app.modal.ConfirmDelete as app.modal.ConfirmDelete';
+
+**/app.controller.register("EditPost", {
 
     post: null,
 
@@ -333,8 +353,10 @@ app.controller.register("About", {
 
 
 });/**SPIKE_IMPORT_END**/ 
-/** 'import $router as app.router'; **/
-/** 'import $events as app.events'; **/app.controller.register("Home", {
+/**'import app.router as app.router';
+'import app.events as app.events';
+
+**/app.controller.register("Home", {
 
     components: {
         PostsList: {
@@ -347,21 +369,23 @@ app.controller.register("About", {
 
         app.events.listen('EnterToPostEvent', function(eventData){
            app.log('User enters to Post controller with data');
-           app.obj(eventData);
         });
 
     }
 
-});/**SPIKE_IMPORT_END**/ 
+});
+/**SPIKE_IMPORT_END**/ 
 app.controller.register("NotFound", {
 
     init: function () {
     }
 
 });/**SPIKE_IMPORT_END**/ 
-/** 'import $router as app.router'; **/
-/** 'import $postService as app.service.Post'; **/
-/** 'import $events as app.events'; **/app.controller.register("Post", {
+/**'import app.router as app.router';
+'import app.service.Post as app.service.Post';
+'import app.events as app.events';
+
+**/app.controller.register("Post", {
 
     post: null,
 
@@ -410,7 +434,9 @@ app.controller.register("Posts", {
     }
 
 });/**SPIKE_IMPORT_END**/ 
-/** 'import $this as app.modal.ConfirmDelete'; **/app.modal.register("ConfirmDelete", {
+/**'import app.modal.ConfirmDelete as app.modal.ConfirmDelete';
+
+**/app.modal.register("ConfirmDelete", {
 
     inherits: [
         app.abstract.Modal
@@ -430,7 +456,9 @@ app.controller.register("Posts", {
 
 
 });/**SPIKE_IMPORT_END**/ 
-/** 'import $rest as app.rest'; **/app.service.register("Comments", {
+/**'import app.rest as app.rest';
+
+**/app.service.register("Comments", {
 
     cachedComments: null,
 
@@ -446,8 +474,10 @@ app.controller.register("Posts", {
 
 
 });/**SPIKE_IMPORT_END**/ 
-/** 'import $rest as app.rest'; **/
-/** 'import $listUtil as app.util.List'; **/app.service.register("Post", {
+/**'import app.rest as app.rest';
+'import app.util.List as app.util.List';
+
+**/app.service.register("Post", {
 
     cachedPosts: null,
 
@@ -512,7 +542,9 @@ app.partial.register("CommentsList", {
     replace: true
 
 });/**SPIKE_IMPORT_END**/ 
-/** 'import $router as app.router'; **/app.partial.register("PostsList", {
+/**'import app.router as app.router';
+
+**/app.partial.register("PostsList", {
 
     replace: true,
 

@@ -6,16 +6,16 @@
     ".gitignore",
     ".jshintignore",
     ".jshintrc",
-	"dist",
-	"node_modules",
-	"bower_components"
+    "dist",
+    "node_modules",
+    "bower_components"
   ],
   "dependencies": {
     "bootstrap": "<4.0.0",
     "jQuery": "~3.0.0",
-    "spike-framework-core": "https://github.com/dsenko/spike-framework-core.git#master"
+    "spike-framework-core": "^2.0.0"
   },
   "devDependencies": {
-    "spike-compiler": "https://github.com/dsenko/spike-compiler.git#master"
+    "spike-compiler": "^2.0.0"
   }
 }
