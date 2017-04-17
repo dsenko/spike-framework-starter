@@ -10,7 +10,7 @@ app.partial.register("PostsList", {
 
     selectPost: function (postId) {
 
-        $router.redirect('post/:postId', {
+        $router.redirectByName('Post', {
             postId: postId
         });
 

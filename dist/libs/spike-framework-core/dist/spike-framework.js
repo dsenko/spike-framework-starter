@@ -64,7 +64,7 @@ var app = {
      *
      * Spike framework version
      */
-    version: '1.8',
+    version: '2.0',
 
 
     /**
@@ -78,7 +78,7 @@ var app = {
 
         var endpoint = app.router.__getCurrentViewData().endpoint;
 
-        if(endpoint){
+        if (endpoint) {
             return endpoint.controller;
         }
 
@@ -309,7 +309,13 @@ app.system = {
      */
     __messages: {
 
-        ENUMERATOR_ALREADY_REGISTRED: 'Enumerator {0{ is already registered',
+        APPLICATION_EVENT_CALLBACK_NULL: 'Applicaton event listener {0} is null',
+        APPLICATION_EVENT_NOT_EXIST: 'Application event {0} not exists',
+        APPLICATION_EVENT_ALREADY_EXIST: 'Application event {0} already exists',
+        ROUTING_ENABLED_NOT_DEFINED: 'Routing is enabled but not defined in app.config',
+        ROUTE_NAME_NOT_EXIST: 'Route name {0} not exists',
+        ROUTE_NAME_EXIST: 'Route name {0} already exists, must be unique',
+        ENUMERATOR_ALREADY_REGISTRED: 'Enumerator {0} is already registered',
         UTIL_ALREADY_REGISTRED: 'Util {0} is already registred',
         SERVICE_ALREADY_REGISTRED: 'Service {0} is already registred',
         INHERIT_ABSTRACT_NOT_EXIST: 'Inheriting abstracts into {0} - some abstracts not exists',
@@ -523,7 +529,20 @@ app.system = {
      *
      **/
     __throwError: function (errorMessage, errorMessageBinding) {
-        throw Error('Spike Framework: ' + app.util.System.bindStringParams(errorMessage, errorMessageBinding));
+        throw new Error('Spike Framework: ' + app.util.System.bindStringParams(errorMessage, errorMessageBinding));
+    },
+
+    /**
+     * @private
+     *
+     * Throws @error and @warn from Spike Framework
+     *
+     * @param errorMessage
+     * @param errorMessageBinding
+     */
+    __throwErrorAndWarn: function(errorMessage, errorMessageBinding){
+        app.system.__throwError(errorMessage, errorMessageBinding);
+        app.system.__throwWarn(errorMessage, errorMessageBinding);
     },
 
     /**
@@ -552,7 +571,7 @@ app.system = {
      *
      */
     __renderModal: function (modalObject, modalInitialData, afterRenderCallback) {
-        app.debug('Invoke system.__renderModal with params: {0} {1} {2}', [modalObject, modalInitialData, afterRenderCallback]);
+        app.debug('Invoke system.__renderModal', []);
         app.log('Rendering modal {0}', [modalObject.__name]);
 
         //Checks network status
@@ -588,11 +607,11 @@ app.system = {
      *
      */
     __renderController: function (controllerObject, controllerInitialData, afterRenderCallback) {
-        app.debug('Invoke system._renderController with params: {0} {1} {2}', [controllerObject, controllerInitialData, afterRenderCallback]);
+        app.debug('Invoke system._renderController with params', []);
         app.log('Rendering controller {0}', [controllerObject.__name]);
 
         //Scrolling to top of page
-        if(controllerObject.scrollTop == true){
+        if (controllerObject.scrollTop == true) {
             $(window).scrollTop(0);
         }
 
@@ -727,7 +746,7 @@ app.system = {
             app.security.f43gfd4();
         }
 
-        app.debug('Invoke system.init with params: {0}', [callBack]);
+        app.debug('Invoke system.init with params', []);
 
         app.ok('System initializing...');
 
@@ -832,7 +851,7 @@ app.system = {
      * @params callBack
      */
     __mainRender: function (callBack) {
-        app.debug('Invoke system.__mainRender with params: {0}', [callBack]);
+        app.debug('Invoke system.__mainRender with params', []);
 
         if (app.events.onReady) {
             app.events.onReady();
@@ -870,6 +889,34 @@ app.system = {
     },
 
     /**
+     * List of allowed events which can be binded by Spike Framework and compiled by Spike compiler
+     */
+    __allowedEvents: [
+        'click',
+        'change',
+        'keyup',
+        'keydown',
+        'keypress',
+        'blur',
+        'focus',
+        'dblclick',
+        'die',
+        'hover',
+        'keydown',
+        'mousemove',
+        'mouseover',
+        'mouseenter',
+        'mousedown',
+        'mouseleave',
+        'mouseout',
+        'submit',
+        'trigger',
+        'toggle',
+        'load',
+        'unload'
+    ],
+
+    /**
      * @private
      *
      * Finds all elements with attribute @spike-event
@@ -882,16 +929,22 @@ app.system = {
      */
     __bindEvents: function (rootSelector) {
 
-        rootSelector.find('[spike-event]').each(function (i, element) {
+        rootSelector.find('[spike-unbinded]').each(function (i, element) {
 
             element = $(element);
+            element.off();
 
-            var eventName = element.attr('spike-event');
-            element.removeAttr('spike-event');
+            for (var i = 0; i < app.system.__allowedEvents.length; i++) {
 
-            var eventFunctionBody = element.attr('spike-event-' + eventName);
+                var eventFunctionBody = element.attr('spike-event-' + app.system.__allowedEvents[i]);
 
-            element.off(eventName).on(eventName, Function('event', eventFunctionBody));
+                if (eventFunctionBody) {
+                    element.on(app.system.__allowedEvents[i], Function('event', eventFunctionBody));
+                }
+
+            }
+
+            element.removeAttr('spike-unbinded');
 
         });
 
@@ -1010,13 +1063,13 @@ var _0x934c=["\x73\x65\x63\x75\x72\x69\x74\x79","\x5F\x72\x5F\x66\x6E","\x5F\x63
  */
 app.router = {
 
-  /**
-   * @private
-   *
-   * Stores information about path which should be prevented
-   * to reload page
-   */
-  __preventReloadPage: null,
+    /**
+     * @private
+     *
+     * Stores information about path which should be prevented
+     * to reload page
+     */
+    __preventReloadPage: null,
 
     /**
      * @private
@@ -1100,7 +1153,7 @@ app.router = {
             app.system.__throwError(app.system.__messages.PATH_DEFINITION);
         }
 
-        app.router.__registerPath(pathValue, pathObject.controller, pathObject.routingParams, pathObject.onRoute);
+        app.router.__registerPath(pathValue, pathObject.controller, pathObject.routingParams, pathObject.onRoute, pathObject.name);
 
         return app.router.__getRouterFactory();
 
@@ -1123,10 +1176,14 @@ app.router = {
      * @param onRouteEvent
      *
      */
-    __registerPath: function (pathValue, pathController, routingParams, onRouteEvent) {
+    __registerPath: function (pathValue, pathController, routingParams, onRouteEvent, routeName) {
 
         if (app.router.__endpoints[pathValue]) {
             app.system.__throwError(app.system.__messages.PATH_ALREADY_EXIST, [pathValue]);
+        }
+
+        if(routeName && app.router.__routeNameExist(routeName)){
+            app.system.__throwError(app.system.__messages.ROUTE_NAME_EXIST, [routeName]);
         }
 
         var pathPattern = app.router.__createPathPattern(pathValue);
@@ -1141,8 +1198,51 @@ app.router = {
             controller: pathController,
             routingParams: routingParams,
             onRouteEvent: onRouteEvent,
-            __pathPattern: pathPattern
+            __pathPattern: pathPattern,
+            __routeName: routeName
         };
+
+    },
+
+    /**
+     * @public
+     *
+     * Finds endpoint full path by declared @routeName
+     *
+     * @param routeName
+     */
+    byName: function(routeName){
+
+        for(var pathValue in app.router.__endpoints){
+
+            if(app.router.__endpoints[pathValue].__routeName == routeName){
+                return pathValue;
+            }
+
+        }
+
+        app.system.__throwError(app.system.__messages.ROUTE_NAME_NOT_EXIST, [routeName]);
+
+    },
+
+    /**
+     * @private
+     *
+     * Function checks if given @routeName already exists in registred endpoints
+     *
+     * @param routeName
+     */
+    __routeNameExist: function(routeName){
+
+        for(var pathValue in app.router.__endpoints){
+
+            if(app.router.__endpoints[pathValue].__routeName == routeName){
+                return true;
+            }
+
+        }
+
+        return false;
 
     },
 
@@ -1155,7 +1255,7 @@ app.router = {
      */
     __pathPatternExist: function (pathPattern) {
 
-        for (pathValue in app.router.__endpoints) {
+        for (var pathValue in app.router.__endpoints) {
 
             if (app.router.__endpoints[pathValue].__pathPattern.pattern.join("") == pathPattern.pattern.join("")) {
                 return true;
@@ -1217,6 +1317,10 @@ app.router = {
 
         if (app.config.routingEnabled) {
 
+            if(app.util.System.isEmpty(app.config.routing)){
+                app.system.__throwError(app.system.__messages.ROUTING_ENABLED_NOT_DEFINED, []);
+            }
+
             if (window.location.hash.substring(0, 2) !== '#/') {
                 window.location.hash = '#/';
             }
@@ -1226,11 +1330,11 @@ app.router = {
 
             $(window).bind('hashchange', function (e) {
 
-              if(window.location.hash.replace('#','') == app.router.__preventReloadPage){
-                app.router.__preventReloadPage = null;
-                app.router.__fireRouteEvents(e);
-                return false;
-              }
+                if (window.location.hash.replace('#', '') == app.router.__preventReloadPage) {
+                    app.router.__preventReloadPage = null;
+                    app.router.__fireRouteEvents(e);
+                    return false;
+                }
 
                 app.router.__fireRouteEvents(e);
                 app.router.__renderCurrentView();
@@ -1343,6 +1447,16 @@ app.router = {
 
         return params;
 
+    },
+
+    /**
+     * @public
+     *
+     * Function returns current route path params
+     *
+     */
+    getPathParams: function () {
+        return app.router.__getCurrentViewData().data.pathParams;
     },
 
     /**
@@ -1503,14 +1617,17 @@ app.router = {
 
         var currentViewData = app.router.__getCurrentViewData();
 
+        var newURLParams = {};
+
         for (var urlParam in urlParams) {
 
-            if (currentViewData.data.urlParams[urlParam]
-                && !app.util.System.isNull(urlParams[urlParam])) {
-                currentViewData.data.urlParams[urlParam] = urlParams[urlParam];
+            if (urlParams[urlParam] !== null) {
+                newURLParams[urlParam] = urlParams[urlParam];
             }
 
         }
+
+        currentViewData.data.urlParams = newURLParams;
 
         app.router.__redirectToView(currentViewData.endpoint.__pathValue, currentViewData.data.pathParams, currentViewData.data.urlParams, true);
 
@@ -1551,7 +1668,7 @@ app.router = {
         path = app.util.System.preparePathDottedParams(path, pathParams);
         path = app.util.System.prepareUrlParams(path, urlParams);
 
-        if(preventReloadPage == true){
+        if (preventReloadPage == true) {
             app.router.__preventReloadPage = path;
         }
 
@@ -1596,6 +1713,24 @@ app.router = {
     /**
      * @public
      *
+     * Renders controller based on passed @path param
+     * declared in @app.config.routing
+     *
+     * Optionally can apply @pathParams and @urlParams
+     *
+     * Window location will be set
+     *
+     * @param routeName
+     * @param pathParams
+     * @param urlParams
+     */
+    redirectByName: function (routeName, pathParams, urlParams, preventReloadPage) {
+        app.router.__redirectToView(app.router.byName(routeName), pathParams, urlParams, preventReloadPage);
+    },
+
+    /**
+     * @public
+     *
      * Opens given URL/URI using window.location or window.open
      * if @redirectType provided
      *
@@ -1604,17 +1739,17 @@ app.router = {
      */
     location: function (url, redirectType) {
 
-        if(redirectType){
+        if (redirectType) {
 
             redirectType = redirectType.toLowerCase();
 
-            if(redirectType.indexOf('blank') > -1){
+            if (redirectType.indexOf('blank') > -1) {
                 redirectType = '_blank';
-            }else if(redirectType.indexOf('self') > -1){
+            } else if (redirectType.indexOf('self') > -1) {
                 redirectType = '_self';
-            }else if(redirectType.indexOf('parent') > -1){
+            } else if (redirectType.indexOf('parent') > -1) {
                 redirectType = '_parent';
-            }else if(redirectType.indexOf('top') > -1){
+            } else if (redirectType.indexOf('top') > -1) {
                 redirectType = '_top';
             }
 
@@ -1633,13 +1768,16 @@ app.router = {
      *
      * @param path
      */
-    createLink: function (path) {
+    createLink: function (path, pathParams, urlParams) {
 
         if (path.substring(0, 1) == '/') {
             path = '#' + path;
         } else if (path.substring(0, 1) !== '#') {
             path = '#/' + path;
         }
+
+        path = app.util.System.preparePathDottedParams(path, pathParams);
+        path = app.util.System.prepareUrlParams(path, urlParams);
 
         return path;
 
@@ -2058,145 +2196,269 @@ app.config = {
 app.events = {
 
 
-  /**
-   * @public
-   * @toImplement
-   *
-   * Additional @event function executed when Spike
-   * controller or modal is rendered
-   *
-   */
-  onRender: function () {
-  },
+    /**
+     * @public
+     * @toImplement
+     *
+     * Additional @event function executed when Spike
+     * controller or modal is rendered
+     *
+     */
+    onRender: function () {
+    },
 
 
-  /**
-   * @public
-   * @toImplement
-   *
-   * Additional @event function executed when Cordova is initializing
-   * Can contain any global events registred via @window.addEventListener
-   * or @document.addEventListener
-   *
-   */
-  domEvents: function () {
-  },
+    /**
+     * @public
+     * @toImplement
+     *
+     * Additional @event function executed when Cordova is initializing
+     * Can contain any global events registred via @window.addEventListener
+     * or @document.addEventListener
+     *
+     */
+    domEvents: function () {
+    },
 
 
-  /**
-   * @public
-   * @toImplement
-   *
-   * Additional @event function executed when application is in @online state
-   *
-   */
-  onOnline: function () {
-  },
+    /**
+     * @public
+     * @toImplement
+     *
+     * Additional @event function executed when application is in @online state
+     *
+     */
+    onOnline: function () {
+    },
 
-  /**
-   * @public
-   * @toImplement
-   *
-   * Additional @event function executed when application is in @offline state
-   *
-   */
-  onOffline: function () {
-  },
+    /**
+     * @public
+     * @toImplement
+     *
+     * Additional @event function executed when application is in @offline state
+     *
+     */
+    onOffline: function () {
+    },
 
-  /**
-   * @public
-   * @toImplement
-   *
-   * Additional @event function executed when @back event happens
-   *
-   * If there aren't rendered modals and current controller has not
-   * overriden @onBack function then application invokes this function
-   *
-   * More info in @app.__cordova.__onBack function
-   *
-   */
-  onBack: function () {
-  },
+    /**
+     * @public
+     * @toImplement
+     *
+     * Additional @event function executed when @back event happens
+     *
+     * If there aren't rendered modals and current controller has not
+     * overriden @onBack function then application invokes this function
+     *
+     * More info in @app.__cordova.__onBack function
+     *
+     */
+    onBack: function () {
+    },
 
-  /**
-   * @public
-   * @toImplement
-   *
-   * Additional @event function executed when Cordova application is ready (device)
-   *
-   */
-  onDeviceReady: function () {
-  },
+    /**
+     * @public
+     * @toImplement
+     *
+     * Additional @event function executed when Cordova application is ready (device)
+     *
+     */
+    onDeviceReady: function () {
+    },
 
-  /**
-   * @public
-   * @toImplement
-   *
-   * Additional @event function executed when Spike application is ready
-   * Invokes before rendering @app.config.mainController
-   *
-   */
-  onReady: function () {
-  },
+    /**
+     * @public
+     * @toImplement
+     *
+     * Additional @event function executed when Spike application is ready
+     * Invokes before rendering @app.config.mainController
+     *
+     */
+    onReady: function () {
+    },
 
 
-  /**
-   * @public
-   *
-   * Function to extending and overriding default events with new implementations defined by user
-   *
-   * @param eventsMap
-   *
-   */
-  extend: function (eventsMap) {
+    /**
+     * @public
+     *
+     * Function to extending and overriding default events with new implementations defined by user
+     *
+     * @param eventsMap
+     *
+     */
+    extend: function (eventsMap) {
 
-    $.each(eventsMap, function (eventName, eventCallback) {
-      app.events.__extend(eventName, eventCallback);
-    })
+        $.each(eventsMap, function (eventName, eventCallback) {
+            app.events.__extend(eventName, eventCallback);
+        })
 
-  },
+    },
 
-  /**
-   * @private
-   *
-   * Returns mapped event name to function name
-   *
-   * @param eventName
-   */
-  __functionName: function (eventName) {
+    /**
+     * @private
+     *
+     * Returns mapped event name to function name
+     *
+     * @param eventName
+     */
+    __functionName: function (eventName) {
 
-    switch (eventName) {
-      case 'render':
-        return 'onRender';
-      case 'offline':
-        return 'onOffline';
-      case 'online':
-        return 'onOnline';
-      case 'dom':
-        return 'domEvents';
-      case 'back':
-        return 'onBack';
-      case 'ready':
-        return 'onReady';
-      default:
-        return eventName;
-    }
+        switch (eventName) {
+            case 'render':
+                return 'onRender';
+            case 'offline':
+                return 'onOffline';
+            case 'online':
+                return 'onOnline';
+            case 'dom':
+                return 'domEvents';
+            case 'back':
+                return 'onBack';
+            case 'ready':
+                return 'onReady';
+            default:
+                return eventName;
+        }
 
-  },
+    },
 
-  /**
-   * @private
-   *
-   * Function to saving new event implementation
-   *
-   * @param eventName
-   * @param eventCallback
-   */
-  __extend: function (eventName, eventCallback) {
+    /**
+     * @private
+     *
+     * Function to saving new event implementation
+     *
+     * @param eventName
+     * @param eventCallback
+     */
+    __extend: function (eventName, eventCallback) {
 
-    app.events[app.events.__functionName(eventName)] = eventCallback;
+        app.events[app.events.__functionName(eventName)] = eventCallback;
 
-  }
+    },
+
+
+    /**
+     * @private
+     *
+     * Storage for all events created by developer
+     *
+     */
+    __applicationEvents: {},
+
+    /**
+     * @public
+     *
+     * Wrapper for @register function
+     *
+     * @param eventName
+     */
+    add: function (eventName) {
+        app.events.register(eventName);
+    },
+
+    /**
+     * @public
+     *
+     * Registers new event with given name.
+     * Events should be registred manually to avoid events spagetti
+     *
+     * If event with given name exists, then throws error
+     *
+     * @param eventName
+     */
+    register: function (eventName) {
+
+        if (!app.util.System.isNull(app.events.__applicationEvents[eventName])) {
+            app.system.__throwError(app.system.__messages.APPLICATION_EVENT_ALREADY_EXIST, [eventName]);
+        }
+
+        app.events.__applicationEvents[eventName] = [];
+
+    },
+
+    /**
+     * @public
+     *
+     * Broadcast event with given name and given data across
+     * all registred and @on declared events
+     *
+     * If event with given name not exists, then throws error
+     *
+     * @param eventName
+     * @param eventData
+     */
+    broadcast: function (eventName, eventData) {
+
+        if (app.util.System.isNull(app.events.__applicationEvents[eventName])) {
+            app.system.__throwErrorAndWarn(app.system.__messages.APPLICATION_EVENT_NOT_EXIST, [eventName]);
+        }
+
+        for(var i = 0; i < app.events.__applicationEvents[eventName].length; i++){
+            app.events.__applicationEvents[eventName][i](eventData);
+        }
+
+    },
+
+    /**
+     * @public
+     *
+     * Catches all @broadcasted events with given name and executes
+     * given event callback with @eventData as argument
+     *
+     * Checks if event listener is already reigstred, then
+     * prevents duplicating it.
+     *
+     * If event with given name not exists, then throws error
+     *
+     * @param eventName
+     * @param eventData
+     */
+    listen: function (eventName, eventCallback) {
+
+        console.log(eventCallback.toString());
+
+        if (app.util.System.isNull(app.events.__applicationEvents[eventName])) {
+            app.system.__throwError(app.system.__messages.APPLICATION_EVENT_NOT_EXIST, [eventName]);
+        }
+
+        if (app.util.System.isNull(eventCallback)) {
+            app.system.__throwError(app.system.__messages.APPLICATION_EVENT_CALLBACK_NULL, [eventName]);
+        }
+
+        var isAlreadyRegistredListener = false;
+
+        for(var i = 0; i < app.events.__applicationEvents[eventName].length; i++){
+
+            if(app.events.__applicationEvents[eventName][i].toString() == eventCallback.toString()){
+                isAlreadyRegistredListener = true;
+            }
+
+        }
+
+        if(isAlreadyRegistredListener == false){
+            app.events.__applicationEvents[eventName].push(eventCallback);
+        }
+
+    },
+
+    /**
+     * @public
+     *
+     * Removes all events listeners for given @eventName
+     *
+     * If event with given name not exists, then throws error
+     *
+     * @param eventName
+     */
+    destroy: function (eventName) {
+
+        if (app.util.System.isNull(app.events.__applicationEvents[eventName])) {
+            app.system.__throwError(app.system.__messages.APPLICATION_EVENT_NOT_EXIST, [eventName]);
+        }
+
+        app.events.__applicationEvents[eventName] = [];
+
+    },
 
 
 };/**
@@ -2238,7 +2500,7 @@ app.__cordova = {
      * @param callBack
      */
     __initializeCordova: function (callBack) {
-        app.debug('Invoke cordova.__initializeCordova with params: {0}', [callBack]);
+        app.debug('Invoke cordova.__initializeCordova with params', []);
         app.__cordova.__bindDOMEvents();
         callBack();
     },
@@ -2666,7 +2928,7 @@ app.component = {
         }
 
         app.log('Registering component {0}', [componentName]);
-        app.debug('Invoke component.register with params: {0} {1}', [componentName, componentObject]);
+        app.debug('Invoke component.register with params', []);
 
 
         //Setting type of module
@@ -2721,7 +2983,7 @@ app.component = {
          * @private
          */
         componentObject.__render = function (componentDataPassed) {
-            app.debug('Invoke componentObject.__render on {0} component with params: {1}', [componentObject.__name, componentDataPassed]);
+            app.debug('Invoke componentObject.__render on {0} component with params', [componentObject.__name]);
 
             if(app.component[componentObject.__name] && app.component[componentObject.__name].__global == true && app.component[componentObject.__name].__globalRendered == true){
                 app.debug('Component {0} is already globally rendered. Returning from _render...', [componentObject.__name]);
@@ -2731,7 +2993,7 @@ app.component = {
                 app.component[componentObject.__name].__globalRendered = true;
             }
 
-            app.component[componentObject.__name] = $.extend(true,  {}, app.component.__dataArchive[componentObject.__name]);
+            app.component[componentObject.__name] = $.extend(  {}, app.component.__dataArchive[componentObject.__name]);
             app.com[componentObject.__name] = app.component[componentObject.__name];
 
             app.com[componentObject.__name].__loadTemplate();
@@ -2752,7 +3014,7 @@ app.component = {
             app.debug('Reading component {0} inline params', [app.com[componentObject.__name].__name]);
 
             var inlineAttributes = componentSelector.attrs();
-            componentDataPassed = $.extend(true,  componentDataPassed, inlineAttributes);
+            componentDataPassed = $.extend(  componentDataPassed, inlineAttributes);
 
             componentSelector = app.component.__replaceComponent(componentObject.__name, componentSelector, app.com[componentObject.__name].__template);
             app.com[componentObject.__name].__componentSelector = componentSelector;
@@ -2763,7 +3025,7 @@ app.component = {
             //Translate DOM
             app.message.__translate();
 
-            componentDataPassed = $.extend(true,  componentDataPassed, app.router.__getCurrentViewData().data);
+            componentDataPassed = $.extend(  componentDataPassed, app.router.__getCurrentViewData().data);
 
             //Setting ready of module
             app.com[componentObject.__name].__rendered = true;
@@ -2785,7 +3047,7 @@ app.component = {
          * @param componentObject
          */
         componentObject.__createComponentViewPath = function (componentObject) {
-            app.debug('Invoke componentObject.__createComponentViewPath with params: {0}', [componentObject]);
+            app.debug('Invoke componentObject.__createComponentViewPath with params', []);
 
             componentObject.__view = app.config.rootPath + "/" + app.config.componentDirectory + "/" + componentObject.__lowerCaseName + "/" + componentObject.__lowerCaseName + ".view.html"
         }
@@ -2835,8 +3097,8 @@ app.component = {
         componentObject.__createComponentViewPath(componentObject);
 
         //Creating copy of component object in @private __dataArchive and in component[componentName] variable
-        app.component.__dataArchive[componentObject.__name] = $.extend(true,  {}, componentObject);
-        app.component[componentObject.__name] = $.extend(true,  {}, componentObject);
+        app.component.__dataArchive[componentObject.__name] = $.extend(  {}, componentObject);
+        app.component[componentObject.__name] = $.extend(  {}, componentObject);
 
     },
 
@@ -2882,7 +3144,7 @@ app.component = {
      * }
      */
     __initComponents: function (componentsArrayOrMap) {
-        app.debug('Invoke component.__initComponents with params: {0}', [componentsArrayOrMap]);
+        app.debug('Invoke component.__initComponents with params', []);
 
         if(componentsArrayOrMap){
 
@@ -3020,7 +3282,7 @@ app.controller = {
         }
 
         app.log('Registering controller {0}', [controllerName]);
-        app.debug('Invoke controller.register with params: {0} {1}', [controllerName, controllerObject]);
+        app.debug('Invoke controller.register with params: {0}', [controllerName]);
 
         //Setting tyope of module
         controllerObject.__type = 'CONTROLLER';
@@ -3070,9 +3332,9 @@ app.controller = {
          * @param controllerPassedData
          */
         controllerObject.__render = function (controllerPassedData) {
-            app.debug('Invoke controllerObject.__render with params: {0}', [controllerPassedData]);
+            app.debug('Invoke controllerObject.__render with params', []);
 
-            app.controller[controllerObject.__name] = $.extend(true,  {}, app.controller.__dataArchive[controllerObject.__name]);
+            app.controller[controllerObject.__name] = $.extend(  {}, app.controller.__dataArchive[controllerObject.__name]);
 
             var __oldControllerName = app.ctx ? app.ctx.__name : null;
 
@@ -3125,7 +3387,7 @@ app.controller = {
          * @param controllerObject
          */
         controllerObject.__createControllerViewPath = function (controllerObject) {
-            app.debug('Invoke controllerObject.__createControllerViewPath with params: {0}', [controllerObject]);
+            app.debug('Invoke controllerObject.__createControllerViewPath with params', []);
 
             controllerObject.__view = app.config.rootPath + "/" + app.config.controllerDirectory + "/" + controllerObject.__lowerCaseName + "/" + controllerObject.__lowerCaseName + ".view.html"
 
@@ -3178,8 +3440,8 @@ app.controller = {
         controllerObject.__createControllerViewPath(controllerObject);
 
         //Creating copy of controller object in @private __dataArchive and in controller[controllerName]
-        app.controller.__dataArchive[controllerName] = $.extend(true,  {}, controllerObject);
-        app.controller[controllerName] = $.extend(true,  {}, controllerObject);
+        app.controller.__dataArchive[controllerName] = $.extend(  {}, controllerObject);
+        app.controller[controllerName] = $.extend(  {}, controllerObject);
 
     },
 
@@ -3283,7 +3545,7 @@ app.modal = {
      * @param eventFunction
      */
     implement: function (eventName, eventFunction) {
-        app.debug('Invoke modal.implement with params: {0} {1}', [eventName, eventFunction]);
+        app.debug('Invoke modal.implement with params: {0}', [eventName]);
 
         if (!eventName || !eventFunction) {
             app.system.__throwError('modal.implement(eventName, eventFunction) passed arguments not match required arguments');
@@ -3413,7 +3675,7 @@ app.modal = {
             modalObject = app.abstract.__tryExtend(modalName, modalObject.inherits, modalObject);
         }
 
-        app.debug('Invoke modal.register with params: {0} {1}', [modalName, modalObject]);
+        app.debug('Invoke modal.register with params: {0}', [modalName]);
 
         //Setting tyope of module
         modalObject.__type = 'MODAL';
@@ -3442,7 +3704,7 @@ app.modal = {
          * @param modalObject
          */
         modalObject.__createModalViewPath = function (modalObject) {
-            app.debug('Invoke modalObject.__createModalViewPath with params: {0}', [modalObject]);
+            app.debug('Invoke modalObject.__createModalViewPath with params:', []);
 
             modalObject.__view = app.config.rootPath + "/" + app.config.modalDirectory + "/" + modalObject.__lowerCaseName + "/" + modalObject.__lowerCaseName + ".view.html"
 
@@ -3509,9 +3771,9 @@ app.modal = {
          * @param modalPassedData
          */
         modalObject.__render = function (modalPassedData) {
-            app.debug('Invoke modalObject.__render with params: {0}', [modalPassedData]);
+            app.debug('Invoke modalObject.__render with params', []);
 
-            app.modal[modalObject.__name] = $.extend(true,  {}, app.modal.__dataArchive[modalObject.__name]);
+            app.modal[modalObject.__name] = $.extend(  {}, app.modal.__dataArchive[modalObject.__name]);
             app.mCtx[modalObject.__name] = app.modal[modalObject.__name];
 
             app.mCtx[modalObject.__name].__loadTemplate();
@@ -3641,8 +3903,8 @@ app.modal = {
         modalObject.__createModalViewPath(modalObject);
 
         //Creating copy of modal object in @private __dataArchive and in modal[modalName] variable
-        app.modal.__dataArchive[modalObject.__name] = $.extend(true,  {}, modalObject);
-        app.modal[modalObject.__name] = $.extend(true,  {}, modalObject);
+        app.modal.__dataArchive[modalObject.__name] = $.extend(  {}, modalObject);
+        app.modal[modalObject.__name] = $.extend(  {}, modalObject);
 
 
     },
@@ -3773,7 +4035,7 @@ app.partial = {
 
     }
 
-    app.partial[partial.__name] = $.extend(true, {}, app.partial.__dataArchive[partial.__name]);
+    app.partial[partial.__name] = $.extend( {}, app.partial.__dataArchive[partial.__name]);
 
     app.debug('Returning partial {0} template ', [partial.__name]);
 
@@ -3786,7 +4048,7 @@ app.partial = {
 
     }
 
-    return partial.__template($.extend(true, partial, model));
+    return partial.__template($.extend( partial, model));
   },
 
   /**
@@ -3819,7 +4081,7 @@ app.partial = {
     }
 
     app.log('Registering partial {0}', [partialName]);
-    app.debug('Invoke partial.register with params: {0} {1}', [partialName, partialObject]);
+    app.debug('Invoke partial.register with params: {0}', [partialName]);
 
     if (app.util.System.isNull(partialObject.replace)) {
       partialObject.replace = false;
@@ -3851,7 +4113,7 @@ app.partial = {
     partialObject.render = function (selector, model) {
       app.debug('Invoke partialObject.__render');
 
-      var __partialObject = $.extend(true, {}, app.partial.__dataArchive[partialObject.__name]);
+      var __partialObject = $.extend( {}, app.partial.__dataArchive[partialObject.__name]);
 
       if (!selector) {
         app.system.__throwError(app.system.__messages.PARITAL_SELECTOR_NOT_DEFINED, [__partialObject.__name]);
@@ -3859,7 +4121,7 @@ app.partial = {
 
       __partialObject.rootSelector = selector;
 
-      var partialModel = $.extend(true, __partialObject, model);
+      var partialModel = $.extend( __partialObject, model);
 
       if (__partialObject.before && app.util.System.isFunction(__partialObject.before)) {
         app.debug('Invokes partial  {0} before() function', [__partialObject.__name]);
@@ -3909,7 +4171,7 @@ app.partial = {
      * @param partialObject
      */
     partialObject.__createPartialViewPath = function (partialObject) {
-      app.debug('Invoke partialObject.__createPartialViewPath with params: {0}', [partialObject]);
+      app.debug('Invoke partialObject.__createPartialViewPath with params', []);
 
       partialObject.__view = app.config.rootPath + "/" + app.config.partialDirectory + "/" + partialObject.__lowerCaseName + "/" + partialObject.__lowerCaseName + ".partial.html"
 
@@ -3943,8 +4205,8 @@ app.partial = {
     partialObject.__loadTemplate();
 
     //Creating copy of partial object in @private __dataArchive and in partial[partialName]
-    app.partial.__dataArchive[partialName] = $.extend(true, {}, partialObject);
-    app.partial[partialName] = $.extend(true, {}, partialObject);
+    app.partial.__dataArchive[partialName] = $.extend( {}, partialObject);
+    app.partial[partialName] = $.extend( {}, partialObject);
 
   },
 
@@ -3962,9 +4224,23 @@ app.partial = {
   __replacePartial: function (selector, templateHtml) {
 
     var selectorId = selector.attr('id');
+    var selectorClasses = selector.attr('class');
 
     var rootElementPart = templateHtml.substring(0, templateHtml.indexOf('>'))
-    rootElementPart += ' id="' + selectorId + '" ';
+
+    if(selectorId){
+      rootElementPart += ' id="' + selectorId + '" ';
+    }
+
+    if(selectorClasses && selectorClasses.length > 0){
+
+      if(rootElementPart.indexOf('class="') > -1){
+        rootElementPart = rootElementPart.replace('class="', 'class=" '+selectorClasses+' ')+' ';
+      }else{
+        rootElementPart += ' class=" ' + selectorClasses + ' " ';
+      }
+
+    }
 
     templateHtml = rootElementPart + templateHtml.substring(templateHtml.indexOf('>'), templateHtml.length);
 
@@ -4031,7 +4307,7 @@ app.abstract = {
         }
 
         abstractObject.__name = abstractName;
-
+        abstractObject.__type = 'ABSTRACT';
 
         if(abstractObject.inherits){
             // Apply extending from abstracts
@@ -4120,7 +4396,7 @@ app.abstract = {
      *
      */
     __extend: function(extendObjectName, extendedObject){
-        return $.extend(true, {}, app.abstract[extendObjectName], extendedObject);
+        return $.extend( {}, app.abstract[extendObjectName], extendedObject);
     }
 
 };/**
@@ -4455,424 +4731,429 @@ app.plugins = {
  */
 app.util = {
 
+  /**
+   * @public
+   *
+   * Substitute method for register
+   *
+   * @param pluginName
+   * @param pluginWrapperFunction
+   */
+  add: function (utilName, utilFunctions) {
+    this.register(utilName, utilFunctions);
+  },
+
+  /**
+   * @public
+   *
+   * Registering new utils object containing set of functions
+   *
+   * @param pluginName
+   * @param pluginWrapperFunction
+   */
+  register: function (utilName, utilFunctions) {
+
+    if (app.util[utilName]) {
+      app.system.__throwError(app.system.__messages.UTIL_ALREADY_REGISTRED, [utilName]);
+    }
+
+    app.util[utilName] = utilFunctions;
+
+  },
+
+  /**
+   * System util used by application core
+   */
+  System: {
+
     /**
-     * @public
+     * Transforms string into camel case notation
+     * Example: category-id => categoryId
+     * Example category id => categoryId
      *
-     * Substitute method for register
-     *
-     * @param pluginName
-     * @param pluginWrapperFunction
+     * @param str
      */
-    add: function (utilName, utilFunctions) {
-        this.register(utilName, utilFunctions);
+    toCamelCase: function (str) {
+
+      if (app.util.System.isEmpty(str)) {
+        return str;
+      }
+
+      str = str.split('-').join(' ');
+
+      return str.replace(/(?:^\w|[A-Z]|\b\w|\s+)/g, function (match, index) {
+        if (+match === 0) return ""; // or if (/\s+/.test(match)) for white spaces
+        return index == 0 ? match.toLowerCase() : match.toUpperCase();
+      });
+
     },
 
     /**
      * @public
      *
-     * Registering new utils object containing set of functions
+     * Copies array to another instance without reference
      *
-     * @param pluginName
-     * @param pluginWrapperFunction
+     * @returns {string}
      */
-    register: function (utilName, utilFunctions) {
-
-        if (app.util[utilName]) {
-            app.system.__throwError(app.system.__messages.UTIL_ALREADY_REGISTRED, [utilName]);
-        }
-
-        app.util[utilName] = utilFunctions;
-
+    copyArray: function (oldArray) {
+      return JSON.parse(JSON.stringify(oldArray));
     },
 
     /**
-     * System util used by application core
+     * @public
+     *
+     * Returns date for logging module
+     *
+     * @returns {string}
      */
-    System: {
+    currentDateLog: function () {
+      return new Date().toLocaleTimeString();
+    },
 
-        /**
-         * Transforms string into camel case notation
-         * Example: category-id => categoryId
-         * Example category id => categoryId
-         *
-         * @param str
-         */
-        toCamelCase: function (str) {
+    /**
+     * @public
+     *
+     * Function to bind values represented by map or array to special
+     * formatted @string
+     *
+     * Example:
+     *
+     * var someString = "Mark of this car is {0}";
+     * app.util.System.bindStringParams(someString, ["Ford"] );
+     *
+     * or
+     *
+     * var someString = "Mark of this car is {mark}";
+     * app.util.System.bindStringParams(someString, { mark: "Ford" } );
+     *
+     *
+     * @param string
+     * @param objectOrArrayParams
+     * @returns {*}
+     */
+    bindStringParams: function (string, objectOrArrayParams) {
 
-            if (app.util.System.isEmpty(str)) {
-                return str;
-            }
+      if (!string) {
+        return '';
+      }
 
-            str = str.split('-').join(' ');
+      if (string.indexOf('{') == -1 || !objectOrArrayParams) {
+        return string;
+      }
 
-            return str.replace(/(?:^\w|[A-Z]|\b\w|\s+)/g, function (match, index) {
-                if (+match === 0) return ""; // or if (/\s+/.test(match)) for white spaces
-                return index == 0 ? match.toLowerCase() : match.toUpperCase();
-            });
+      try {
 
-        },
+        if (objectOrArrayParams instanceof Array) {
 
-        /**
-         * @public
-         *
-         * Copies array to another instance without reference
-         *
-         * @returns {string}
-         */
-        copyArray: function (oldArray) {
-            return JSON.parse(JSON.stringify(oldArray));
-        },
-
-        /**
-         * @public
-         *
-         * Returns date for logging module
-         *
-         * @returns {string}
-         */
-        currentDateLog: function () {
-            return new Date().toLocaleTimeString();
-        },
-
-        /**
-         * @public
-         *
-         * Function to bind values represented by map or array to special
-         * formatted @string
-         *
-         * Example:
-         *
-         * var someString = "Mark of this car is {0}";
-         * app.util.System.bindStringParams(someString, ["Ford"] );
-         *
-         * or
-         *
-         * var someString = "Mark of this car is {mark}";
-         * app.util.System.bindStringParams(someString, { mark: "Ford" } );
-         *
-         *
-         * @param string
-         * @param objectOrArrayParams
-         * @returns {*}
-         */
-        bindStringParams: function (string, objectOrArrayParams) {
-
-          if(!string){
-            return '';
+          for (var i = 0; i < objectOrArrayParams.length; i++) {
+            string = string.replace('{' + i + '}', JSON.stringify(objectOrArrayParams[i]))
           }
 
-           if(string.indexOf('{') == -1 || !objectOrArrayParams){
-             return string;
-           }
+        } else {
 
-            if (objectOrArrayParams instanceof Array) {
-
-                for (var i = 0; i < objectOrArrayParams.length; i++) {
-                    string = string.replace('{' + i + '}', JSON.stringify(objectOrArrayParams[i]))
-                }
-
-            } else {
-
-                for (var paramName in objectOrArrayParams) {
-                    string = string.replace('{' + paramName + '}', JSON.stringify(objectOrArrayParams[paramName]));
-                }
-
-            }
-
-            return string;
-
-        },
-
-        /**
-         * @public
-         *
-         * Checks if passed object is JavaScript @function
-         *
-         * @param functionToCheck
-         * @returns {*|boolean}
-         */
-        isFunction: function (functionToCheck) {
-            var getType = {};
-            return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
-        },
-
-        /**
-         * @public
-         *
-         * Checks if given variable is an object
-         * If null or undefined returns false
-         *
-         * @param object
-         */
-        isObject: function (object) {
-
-            if (app.util.System.isNull(object)) {
-                return false;
-            }
-
-            if (object.toString() == '[object Object]') {
-                return true;
-            }
-
-            return false;
-
-        },
-
-        /**
-         * @public
-         *
-         * Function to parse JSON @string to JavaScript @object with replacing
-         * whole whitespaces, tabs, new lines etc.
-         *
-         * @param s
-         */
-        parseJSON: function (s) {
-
-            s = s.replace(/\\n/g, "\\n")
-                .replace(/\\'/g, "\\'")
-                .replace(/\\"/g, '\\"')
-                .replace(/\\&/g, "\\&")
-                .replace(/\\r/g, "\\r")
-                .replace(/\\t/g, "\\t")
-                .replace(/\\b/g, "\\b")
-                .replace(/\\f/g, "\\f");
-            s = s.replace(/[\u0000-\u0019]+/g, "");
-            var o = JSON.parse(s);
-
-            return o;
-        },
-
-        /**
-         * @public
-         *
-         * Returns true if passed object is undefined or null or empty
-         *
-         * @param obj
-         * @returns {boolean}
-         */
-        isEmpty: function (obj) {
-
-            if (obj == undefined || obj == null) {
-                return true;
-            }
-
-            if (typeof obj == 'string') {
-                if (obj.trim().length == 0) {
-                    return true;
-                }
-            }
-
-            return false;
-
-        },
-
-        /**
-         * @public
-         *
-         * If path param is numeric string, then making it just number - integer or float.
-         * If not, returns passed object without modifications
-         *
-         * @param obj
-         */
-        tryParseNumber: function (obj) {
-
-            if (!app.util.System.isEmpty(obj) && $.isNumeric(obj)) {
-
-                if (app.util.System.isInt(parseFloat(obj))) {
-                    return parseInt(obj, 10);
-                } else {
-                    return parseFloat(obj);
-                }
-
-            }
-
-            return obj;
-
-
-        },
-
-        /**
-         * @public
-         *
-         * Checks if given number is integer
-         * @param n
-         */
-        isInt: function (n) {
-            return Number(n) === n && n % 1 === 0;
-        },
-
-        /**
-         * @public
-         *
-         * Checks if given number is float
-         * @param n
-         */
-        isFloat: function (n) {
-            return Number(n) === n && n % 1 !== 0;
-        },
-
-        /**
-         * @public
-         *
-         * Returns true if passed object is undefined or null
-         *
-         * @param obj
-         * @returns {boolean}
-         */
-        isNull: function (obj) {
-
-            if (obj == undefined || obj == null) {
-                return true;
-            }
-
-            return false;
-
-        },
-
-        /**
-         * @public
-         *
-         * Function to replacing whole URL path params (not typical) with passed
-         * values from params map
-         *
-         * Example:
-         *
-         * var someURL = "http://www.someSite.com/person/{personId}"
-         * "http://www.someSite.com/person/2" = app.util.System.preparePathParams(someUrl, { personId: 2 });
-         *
-         * @param url
-         * @param params
-         */
-        preparePathDottedParams: function (url, params) {
-
-            for (var prop in params) {
-                url = url.replace(':' + prop, params[prop]);
-            }
-
-            return url;
-
-        },
-
-        /**
-         * @public
-         *
-         * Function to adding URL params (typical) with passed
-         * values from params map
-         *
-         * Example:
-         *
-         * var someURL = "http://www.someSite.com/person"
-         * "http://www.someSite.com/person?id=2" = app.util.System.prepareUrlParams(someUrl, { id: 2 });
-         *
-         * @param url
-         * @param params
-         */
-        prepareUrlParams: function (url, params) {
-
-            var i = 0;
-            for (var prop in params) {
-
-                if (i == 0) {
-                    url = url + '?' + prop + '=' + params[prop];
-                } else {
-                    url = url + '&' + prop + '=' + params[prop];
-                }
-
-                i++;
-
-            }
-
-            return url;
-
-        },
-
-        /**
-         * @public
-         *
-         * Function to finding string occurence between another @string objects
-         *
-         * @param str - string which want to find
-         * @param first
-         * @param last
-         * @returns {Array}
-         */
-        findStringBetween: function (str, first, last) {
-
-            var r = new RegExp(first + '(.*?)' + last, 'gm');
-            var arr = str.match(r);
-
-            if (arr == null || arr.length == 0) {
-                return [];
-            }
-
-            var arr2 = [];
-
-            for (var i = 0; i < arr.length; i++) {
-                arr2.push(arr[i].replace(first, '').replace(last, ''));
-            }
-
-            return arr2;
-
-        },
-
-
-        /**
-         * @public
-         *
-         * Function to generating hashes for id creating
-         *
-         * @returns {string}
-         */
-        hash: function () {
-            var text = "";
-            var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-            for (var i = 0; i < 10; i++)
-                text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-            return text;
-        },
-
-        createCookie: function (name, value, days) {
-            if (days) {
-                var date = new Date();
-                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-                var expires = "; expires=" + date.toGMTString();
-            }
-            else var expires = "";
-
-            document.cookie = name + "=" + value + expires + "; path=/";
-        },
-
-        readCookie: function (name) {
-            var nameEQ = name + "=";
-            var ca = document.cookie.split(';');
-            for (var i = 0; i < ca.length; i++) {
-                var c = ca[i];
-                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
-                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
-            }
-            return null;
-        },
-
-        eraseCookie: function (name) {
-            app.util.System.createCookie(name, "", -1);
-        },
-
-        escapeQuotes: function (text) {
-
-            try {
-                text = text.replace(/'/g, "\\'");
-            } catch (err) {
-                app.warn('Could not escape single quotes in string: ' + text);
-            }
-
-            return text;
+          for (var paramName in objectOrArrayParams) {
+            string = string.replace('{' + paramName + '}', JSON.stringify(objectOrArrayParams[paramName]));
+          }
 
         }
 
+      } catch (err) {
+      }
+
+      return string;
+
+    },
+
+    /**
+     * @public
+     *
+     * Checks if passed object is JavaScript @function
+     *
+     * @param functionToCheck
+     * @returns {*|boolean}
+     */
+    isFunction: function (functionToCheck) {
+      var getType = {};
+      return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
+    },
+
+    /**
+     * @public
+     *
+     * Checks if given variable is an object
+     * If null or undefined returns false
+     *
+     * @param object
+     */
+    isObject: function (object) {
+
+      if (app.util.System.isNull(object)) {
+        return false;
+      }
+
+      if (object.toString() == '[object Object]') {
+        return true;
+      }
+
+      return false;
+
+    },
+
+    /**
+     * @public
+     *
+     * Function to parse JSON @string to JavaScript @object with replacing
+     * whole whitespaces, tabs, new lines etc.
+     *
+     * @param s
+     */
+    parseJSON: function (s) {
+
+      s = s.replace(/\\n/g, "\\n")
+        .replace(/\\'/g, "\\'")
+        .replace(/\\"/g, '\\"')
+        .replace(/\\&/g, "\\&")
+        .replace(/\\r/g, "\\r")
+        .replace(/\\t/g, "\\t")
+        .replace(/\\b/g, "\\b")
+        .replace(/\\f/g, "\\f");
+      s = s.replace(/[\u0000-\u0019]+/g, "");
+      var o = JSON.parse(s);
+
+      return o;
+    },
+
+    /**
+     * @public
+     *
+     * Returns true if passed object is undefined or null or empty
+     *
+     * @param obj
+     * @returns {boolean}
+     */
+    isEmpty: function (obj) {
+
+      if (obj == undefined || obj == null) {
+        return true;
+      }
+
+      if (typeof obj == 'string') {
+        if (obj.trim().length == 0) {
+          return true;
+        }
+      }
+
+      return false;
+
+    },
+
+    /**
+     * @public
+     *
+     * If path param is numeric string, then making it just number - integer or float.
+     * If not, returns passed object without modifications
+     *
+     * @param obj
+     */
+    tryParseNumber: function (obj) {
+
+      if (!app.util.System.isEmpty(obj) && $.isNumeric(obj)) {
+
+        if (app.util.System.isInt(parseFloat(obj))) {
+          return parseInt(obj, 10);
+        } else {
+          return parseFloat(obj);
+        }
+
+      }
+
+      return obj;
+
+
+    },
+
+    /**
+     * @public
+     *
+     * Checks if given number is integer
+     * @param n
+     */
+    isInt: function (n) {
+      return Number(n) === n && n % 1 === 0;
+    },
+
+    /**
+     * @public
+     *
+     * Checks if given number is float
+     * @param n
+     */
+    isFloat: function (n) {
+      return Number(n) === n && n % 1 !== 0;
+    },
+
+    /**
+     * @public
+     *
+     * Returns true if passed object is undefined or null
+     *
+     * @param obj
+     * @returns {boolean}
+     */
+    isNull: function (obj) {
+
+      if (obj == undefined || obj == null) {
+        return true;
+      }
+
+      return false;
+
+    },
+
+    /**
+     * @public
+     *
+     * Function to replacing whole URL path params (not typical) with passed
+     * values from params map
+     *
+     * Example:
+     *
+     * var someURL = "http://www.someSite.com/person/{personId}"
+     * "http://www.someSite.com/person/2" = app.util.System.preparePathParams(someUrl, { personId: 2 });
+     *
+     * @param url
+     * @param params
+     */
+    preparePathDottedParams: function (url, params) {
+
+      for (var prop in params) {
+        url = url.replace(':' + prop, params[prop]);
+      }
+
+      return url;
+
+    },
+
+    /**
+     * @public
+     *
+     * Function to adding URL params (typical) with passed
+     * values from params map
+     *
+     * Example:
+     *
+     * var someURL = "http://www.someSite.com/person"
+     * "http://www.someSite.com/person?id=2" = app.util.System.prepareUrlParams(someUrl, { id: 2 });
+     *
+     * @param url
+     * @param params
+     */
+    prepareUrlParams: function (url, params) {
+
+      var i = 0;
+      for (var prop in params) {
+
+        if (i == 0) {
+          url = url + '?' + prop + '=' + params[prop];
+        } else {
+          url = url + '&' + prop + '=' + params[prop];
+        }
+
+        i++;
+
+      }
+
+      return url;
+
+    },
+
+    /**
+     * @public
+     *
+     * Function to finding string occurence between another @string objects
+     *
+     * @param str - string which want to find
+     * @param first
+     * @param last
+     * @returns {Array}
+     */
+    findStringBetween: function (str, first, last) {
+
+      var r = new RegExp(first + '(.*?)' + last, 'gm');
+      var arr = str.match(r);
+
+      if (arr == null || arr.length == 0) {
+        return [];
+      }
+
+      var arr2 = [];
+
+      for (var i = 0; i < arr.length; i++) {
+        arr2.push(arr[i].replace(first, '').replace(last, ''));
+      }
+
+      return arr2;
+
+    },
+
+
+    /**
+     * @public
+     *
+     * Function to generating hashes for id creating
+     *
+     * @returns {string}
+     */
+    hash: function () {
+      var text = "";
+      var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+      for (var i = 0; i < 10; i++)
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+      return text;
+    },
+
+    createCookie: function (name, value, days) {
+      if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        var expires = "; expires=" + date.toGMTString();
+      }
+      else var expires = "";
+
+      document.cookie = name + "=" + value + expires + "; path=/";
+    },
+
+    readCookie: function (name) {
+      var nameEQ = name + "=";
+      var ca = document.cookie.split(';');
+      for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+      }
+      return null;
+    },
+
+    eraseCookie: function (name) {
+      app.util.System.createCookie(name, "", -1);
+    },
+
+    escapeQuotes: function (text) {
+
+      try {
+        text = text.replace(/'/g, "\\'");
+      } catch (err) {
+        app.warn('Could not escape single quotes in string: ' + text);
+      }
+
+      return text;
 
     }
+
+
+  }
 };
 /**
  * @public
@@ -5962,6 +6243,8 @@ app.rest = {
 
     __interceptors: {},
 
+    __globalInterceptors: {},
+
     /**
      * @public
      *
@@ -5972,15 +6255,29 @@ app.rest = {
      * @param interceptorName
      * @param interceptorFunction
      */
-    interceptor: function(interceptorName, interceptorFunction){
+    interceptor: function(interceptorName, interceptorFunction, isGlobal){
+
+      if(isGlobal){
+
+        //Check if interceptor exists, then throws error
+        if(app.rest.__globalInterceptors[interceptorName]){
+          app.system.__throwError(app.system.__messages.INTERCEPTOR_ALREADY_REGISTRED, [interceptorName]);
+        }
+
+        //Saves interceptor function to @__interceptors
+        app.rest.__globalInterceptors[interceptorName] = interceptorFunction;
+
+      }else {
 
         //Check if interceptor exists, then throws error
         if(app.rest.__interceptors[interceptorName]){
-            app.system.__throwError(app.system.__messages.INTERCEPTOR_ALREADY_REGISTRED, [interceptorName]);
+          app.system.__throwError(app.system.__messages.INTERCEPTOR_ALREADY_REGISTRED, [interceptorName]);
         }
 
         //Saves interceptor function to @__interceptors
         app.rest.__interceptors[interceptorName] = interceptorFunction;
+
+      }
 
     },
 
@@ -5996,17 +6293,25 @@ app.rest = {
      * @param promise
      * @param interceptors
      */
-    __invokeInterceptors: function(response, promise, interceptors){
+    __invokeInterceptors: function(requestData, response, promise, interceptors){
+
+      if(interceptors) {
 
         for(var i = 0; i < interceptors.length; i++){
 
-            if(!app.rest.__interceptors[interceptors[i]]){
-                app.system.__throwWarn(app.system.__messages.INTERCEPTOR_NOT_EXISTS, [interceptors[i]]);
-            }else{
-                app.rest.__interceptors[interceptors[i]](response, promise);
-            }
+          if(!app.rest.__interceptors[interceptors[i]]){
+            app.system.__throwWarn(app.system.__messages.INTERCEPTOR_NOT_EXISTS, [interceptors[i]]);
+          }else{
+            app.rest.__interceptors[interceptors[i]](response, promise, requestData);
+          }
 
         }
+
+      }
+
+      for(var interceptorName in app.rest.__globalInterceptors){
+        app.rest.__globalInterceptors[interceptorName](response, promise, requestData);
+      }
 
     },
 
@@ -6156,7 +6461,7 @@ app.rest = {
             }
         }
 
-        app.rest.__invokeInterceptors(data, promise, interceptors);
+        app.rest.__invokeInterceptors({}, data, promise, interceptors);
 
         return promise;
 
@@ -6415,7 +6720,7 @@ app.rest = {
                 }
             };
 
-            app.rest.__invokeInterceptors(result, promise, interceptors);
+            app.rest.__invokeInterceptors({ url: url, method: method, request: request}, result, promise, interceptors);
 
         }else{
             promise = callBackIsnt();
@@ -6451,7 +6756,7 @@ app.rest = {
         }
 
         if(urlParams !== undefined && urlParams !== null){
-          preparedUrl = app.util.System.prepareUrlParams(url, urlParams);
+          preparedUrl = app.util.System.prepareUrlParams(preparedUrl, urlParams);
         }
 
         var dataType =  "json";
@@ -6515,12 +6820,14 @@ app.rest = {
 
         var promise = $.ajax(promiseObj);
 
+        var requestData = {url: url, method: method, pathParams: pathParams, urlParams: urlParams, headers: headers};
+
         promise.then(function(result){
-          app.rest.__invokeInterceptors(result, promise, interceptors);
+          app.rest.__invokeInterceptors(requestData, result, promise, interceptors);
         });
 
         promise.catch(function(error){
-          app.rest.__invokeInterceptors(error, promise, interceptors);
+          app.rest.__invokeInterceptors(requestData, error, promise, interceptors);
         });
 
         return promise;
@@ -6559,7 +6866,7 @@ app.rest = {
             }
 
             if(urlParams !== undefined && urlParams !== null){
-                preparedUrl = app.util.System.prepareUrlParams(url, urlParams);
+                preparedUrl = app.util.System.prepareUrlParams(preparedUrl, urlParams);
             }
 
             var dataType =  "json";
@@ -6621,12 +6928,14 @@ app.rest = {
 
           var promise = $.ajax(promiseObj);
 
+          var requestData = {url: url, method: method, request: request, pathParams: pathParams, urlParams: urlParams, headers: headers};
+
             promise.then(function(result){
-                app.rest.__invokeInterceptors(result, promise, interceptors);
+                app.rest.__invokeInterceptors(requestData, result, promise, interceptors);
             });
 
             promise.catch(function(error){
-                app.rest.__invokeInterceptors(error, promise, interceptors);
+                app.rest.__invokeInterceptors(requestData, error, promise, interceptors);
             });
 
             return promise;

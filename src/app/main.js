@@ -41,6 +41,8 @@ app.events.extend({
 
 })
 
+app.events.register('EnterToPostEvent');
+
 /**
  * Inits Spike application
  */

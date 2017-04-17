@@ -79,7 +79,7 @@
 ; html += '' 
 ; html += '<div class="comments">' 
 ; html += '' 
-; html += '    <button class="btn btn-primary back-to-btn" spike-event="click" spike-event-click="app.router.back();" spike-translation="back_to_post">back_to_post</button>' 
+; html += '    <button class="btn btn-primary back-to-btn" spike-unbinded spike-event-click="app.router.back();" spike-translation="back_to_post">back_to_post</button>' 
 ; html += '' 
 ; html += '    <h2 spike-translation="comments_list">comments_list</h2>' 
 ; html += '    <component name="commentsList"></component>' 
@@ -198,7 +198,7 @@
 ; var html = "" 
 ; html += '<ul>' 
 ; html += '' 
-;  $.each($local.comments, function(i, comment) { 
+  $.each($local.comments, function(i, comment) { 
 ; html += '' 
 ; html += '    <li>' 
 ; html += '' 
@@ -222,14 +222,14 @@
 ; html += '' 
 ; html += '<ul>' 
 ; html += '' 
-;      $.each($local.posts.slice(0, $local.limit), function(i, post){ 
+      $.each($local.posts.slice(0, $local.limit), function(i, post){ 
 ; html += '' 
 ; html += '        <li >' 
 ; html += '' 
 ; html += '            <div class="title">'+post.title+'</div>' 
 ; html += '            <div class="body">'+post.body+'</div>' 
 ; html += '            <div class="read-more">' 
-; html += '                <button type="button" class="btn btn-default" spike-event="click" spike-event-click="app.partial.PostsList.selectPost('+post.id+')" spike-translation="read_more">' 
+; html += '                <button type="button" class="btn btn-default" spike-unbinded spike-event-click="app.partial.PostsList.selectPost('+post.id+')"  spike-translation="read_more">' 
 ; html += '                </button>' 
 ; html += '            </div>' 
 ; html += '' 

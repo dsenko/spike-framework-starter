@@ -15,7 +15,7 @@ app.config.extend({
 
     rootPath: 'src/app',
     bootstrapModal: true,
-    mainController: "Posts",
+    mainController: "Home",
 
     transitions: true,
 
@@ -30,6 +30,7 @@ app.config.extend({
             controller: 'Posts'
         })
         .path('/post/:postId', {
+            name: 'Post',
             controller: 'Post'
         })
         .path('/post/edit/:postId', {

@@ -15,7 +15,7 @@ app.config.extend({
 
     rootPath: 'src/app',
     bootstrapModal: true,
-    mainController: "Posts",
+    mainController: "Home",
 
     transitions: true,
 
@@ -30,6 +30,7 @@ app.config.extend({
             controller: 'Posts'
         })
         .path('/post/:postId', {
+            name: 'Post',
             controller: 'Post'
         })
         .path('/post/edit/:postId', {
@@ -332,7 +333,8 @@ app.controller.register("About", {
 
 
 });/**SPIKE_IMPORT_END**/ 
-/** 'import $router as app.router'; **/app.controller.register("Home", {
+/** 'import $router as app.router'; **/
+/** 'import $events as app.events'; **/app.controller.register("Home", {
 
     components: {
         PostsList: {
@@ -342,6 +344,12 @@ app.controller.register("About", {
 
     init: function (params) {
         app.debug('params',params);
+
+        app.events.listen('EnterToPostEvent', function(eventData){
+           app.log('User enters to Post controller with data');
+           app.obj(eventData);
+        });
+
     }
 
 });/**SPIKE_IMPORT_END**/ 
@@ -352,7 +360,8 @@ app.controller.register("NotFound", {
 
 });/**SPIKE_IMPORT_END**/ 
 /** 'import $router as app.router'; **/
-/** 'import $postService as app.service.Post'; **/app.controller.register("Post", {
+/** 'import $postService as app.service.Post'; **/
+/** 'import $events as app.events'; **/app.controller.register("Post", {
 
     post: null,
 
@@ -364,6 +373,11 @@ app.controller.register("NotFound", {
             .then(function(result){
                 app.controller.Post.post = result;
                 app.controller.Post.setPost();
+
+                app.events.broadcast('EnterToPostEvent', {
+                    post: result
+                });
+
             })
             .catch(function(error){
 
@@ -508,7 +522,7 @@ app.partial.register("CommentsList", {
 
     selectPost: function (postId) {
 
-        app.router.redirect('post/:postId', {
+        app.router.redirectByName('Post', {
             postId: postId
         });
 
@@ -613,6 +627,8 @@ app.events.extend({
     }
 
 })
+
+app.events.register('EnterToPostEvent');
 
 /**
  * Inits Spike application

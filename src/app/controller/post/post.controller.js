@@ -1,5 +1,6 @@
 'import $router as app.router';
 'import $postService as app.service.Post';
+'import $events as app.events';
 
 app.controller.register("Post", {
 
@@ -13,6 +14,11 @@ app.controller.register("Post", {
             .then(function(result){
                 $this.post = result;
                 $this.setPost();
+
+                $events.broadcast('EnterToPostEvent', {
+                    post: result
+                });
+
             })
             .catch(function(error){
 
