@@ -1,15 +1,13 @@
 {
   "name": "spike-framework-starter-template",
-  "version": "1.2.0",
   "description": "Starter template to build Web and Mobile apps using Spike Framework",
+  "version": "2.0.0",
   "main": "gruntfile.js",
   "scripts": {
-    "setup": "npm install && bower install && gem install sass"
+      "setup": "npm install && bower install && gem install sass"
   },
-  "author": "Dawid Senko & SmartSource",
-  "license": "Apache 2.0",
-  "devDependencies": {
-    "grunt": ">=1.0.1",
+   "devDependencies": {
+	"grunt": ">=1.0.1",
     "grunt-cache-breaker": ">=2.0.1",
     "grunt-common-html2js": ">=0.3.5",
     "grunt-concurrent": ">=2.3.0",
@@ -23,5 +21,41 @@
     "grunt-contrib-watch": ">=1.0.0",
     "grunt-preprocess": ">=5.1.0",
     "grunt-shell-spawn": ">=0.3.10"
-  }
+  },
+  "keywords": [
+	"spike template",
+	"spike starter",
+    "spike framework",
+    "spike javascript",
+    "spike js",
+    "spike",
+    "javascript framework",
+    "mobile framework"
+  ],
+  "maintainers": [
+    {
+      "name": "Dawid Senko",
+      "email": "dawid@spikeframework.com",
+      "web": "http://spikeframework.com/"
+    }
+  ],
+  "demos": [
+    "http://spikeframework.com/"
+  ],
+  "bugs": {
+    "web": "https://github.com/dsenko/spike-framework-core/issues"
+  },
+  "repositories": [
+    {
+      "type": "git",
+      "url": "https://github.com/dsenko/spike-framework-core"
+    }
+  ],
+  "licenses": [
+    {
+      "name": "MIT with exclusions",
+      "url": "http://spikeframework.com/license.html"
+    }
+  ],
+  "homepage": "http://spikeframework.com/"
 }
